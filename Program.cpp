@@ -13,7 +13,7 @@ std::string find_replace(std::string str, std::string s1, std::string s2)
 {
     size_t n;
     std::string *rstr = &str;
-    while ((n = rstr->find(s1)) != (size_t)-1)
+    while ((n = rstr->find(s1)) != std::string::npos)
     {
         rstr->erase(n, s1.length());
         rstr->insert(n, s2);
@@ -24,7 +24,7 @@ std::string find_replace(std::string str, std::string s1, std::string s2)
 
 void Program::preprocess(void)
 {
-	std::string tempfile = find_replace(file, ".w", ".tmp");
+	std::string tempfile = find_replace(file, ".worm", ".tmp");
 	std::ifstream fd_in(file.c_str(), std::ios_base::in);
 	std::ofstream fd_out(tempfile.c_str(), std::ios_base::out);
 	if (!fd_in.is_open() || !fd_out.is_open())
@@ -55,9 +55,7 @@ void Program::preprocess(void)
 				throw std::runtime_error("Expected parenthesis!");
 			else
 				func_name.erase(i);
-			i = func_name.find(' ');
-			if (i != std::string::npos)
-				func_name.erase(i);
+			func_name = find_replace(func_name, " ", "");
 			funcs[func_name] = std::string("");
 			in_function = true;
 			continue ;
@@ -79,9 +77,7 @@ void Program::preprocess(void)
 			size_t j = func_name.find("(");
 			if (j != std::string::npos)
 				func_name.erase(j);
-			j = func_name.find(" ");
-			if (j != std::string::npos)
-				func_name.erase(j, 1);
+			func_name = find_replace(func_name, " ", "");
 			if (funcs.count(func_name))
 				progr.at(i) = funcs[func_name];
 		}

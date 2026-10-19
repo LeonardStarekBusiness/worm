@@ -8,3 +8,4 @@ func quit ()
 
 announce()
 quit()
+quit()

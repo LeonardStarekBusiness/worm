@@ -11,5 +11,5 @@ Goal: Execution will instead execute the generated code.
 
 ## Execution
 ```bash
-    ./worm <program.w> --prep
+    ./worm <program.worm> --prep
 ```
