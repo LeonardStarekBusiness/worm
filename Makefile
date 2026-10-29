@@ -1,23 +1,24 @@
-NAME = worm
+NAME = build/worm
 
-CFLAGGEN = -Wall -Wextra -Werror -g
+CXX = c++
+CXXFLAGS = -Wall -Wextra -Wpedantic -Werror -g -std=c++23 -Iinclude
 
-CC = c++
-
-QUELLE_DATEIEN = Program.cpp worm.cpp
-
-OBJEKT_DATEIEN = $(QUELLE_DATEIEN:%.cpp=%.o)
+SRC_FILES = src/program.cpp src/worm.cpp
+OBJ_FILES = $(SRC_FILES:src/%.cpp=build/%.o)
 
 all: $(NAME)
 
-%.o: %.cpp
-	$(CC) $(CFLAGGEN) -c $< -o $@
+build: 
+	mkdir -p build
 
-$(NAME): $(OBJEKT_DATEIEN)
-	$(CC) $(CFLAGGEN) $(OBJEKT_DATEIEN) -o $(NAME)
+build/%.o: src/%.cpp | build
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(NAME): $(OBJ_FILES)
+	$(CXX) $(CXXFLAGS) $(OBJ_FILES) -o $(NAME)
 
 clean: 
-	rm -f $(OBJEKT_DATEIEN)
+	rm -f $(OBJ_FILES)
 
 fclean: clean 
 	rm -f $(NAME)

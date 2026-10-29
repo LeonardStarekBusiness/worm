@@ -1,0 +1,14 @@
+-g
+-Iinclude
+-x
+c++
+-std=c++23
+-Wall
+-Wextra
+-Wpedantic
+-fsanitize=address,undefined
+-Wconversion
+-Wsign-conversion
+-Wshadow
+-Wold-style-cast
+-Werror=return-type
