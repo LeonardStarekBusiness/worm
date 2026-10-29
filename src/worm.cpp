@@ -1,4 +1,4 @@
-#include "worm.hpp"
+#include "worm/worm.h"
 #include <stdexcept>
 
 int main(int ac, char **av)
