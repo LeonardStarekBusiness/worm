@@ -28,7 +28,7 @@ private:
    * Sub-functions that this function should call sequentially 
    * Stored as pointers to improve performance
    */
-  const std::vector<Function*> sub_funcs;
+  std::vector<Function*> sub_funcs;
   /*
    * Mapping to assign the correct parameters provided in `operator()()`
    * to the sub-functions
@@ -38,7 +38,7 @@ private:
    * first function in `sub_funcs_` takes the first and third parameters
    * that are provided to `operator()()`
    */
-  const std::vector<std::vector<std::size_t>> param_mapping;
+  std::vector<std::vector<std::size_t>> param_mapping;
   /*
   * Base function, used as entry point to introduce C++ functions to Worm
   * Example use case: 
@@ -51,7 +51,7 @@ private:
   * and other functions should either be a base function 
   * or build on top of those)
   */
-  void (*base_func)(const std::vector<std::string>&) = nullptr;
+  void (*const base_func)(const std::vector<std::string>&) = nullptr;
 
 public:
   Function(const std::vector<std::string>& lines);
