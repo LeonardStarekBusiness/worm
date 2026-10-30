@@ -2,6 +2,7 @@
 #define WORM_WSTD_H
 
 #include <string>
+#include <vector>
 
 /*
  * wstd stands for Worm-STandarD-library
@@ -15,8 +16,8 @@
  * --converts it into--> std::cout << x
  */
 namespace wstd {
-void decl_func(const std::string& func_decl_str);
-void print(const std::string& s);
+void print(const std::vector<std::string>&);
+void println(const std::vector<std::string>&);
 } // namespace wstd
 
 #endif // WORM_WSTD_H
