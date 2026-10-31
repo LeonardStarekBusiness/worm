@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -32,11 +33,15 @@ std::vector<std::string> parse_params(std::string_view s) {
     return {};
   }
 
-  std::string::difference_type start_offset {s[0] == '(' ? 1 : 0};
-  std::string::difference_type end_offset {s[s.size() - 1] == ')' ? 1 : 0};
+  if (s[0] != '(' || s[s.size() - 1] != ')') {
+    throw std::runtime_error("Error parsing parameters: missing parentheses!");
+  }
+
+  /* Established that the outer parens are matching, now we can ignore them */
+  s = std::string_view {s.begin() + 1, s.end() - 1};
 
   bool invalid_chars {
-    !std::all_of(s.begin() + start_offset, s.end() - end_offset, [](auto ch) {
+    !std::all_of(s.begin(), s.end(), [](auto ch) {
       auto uch {static_cast<unsigned char>(ch)};
       return std::isalpha(uch) || std::isspace(uch) || uch == ',';
     })

@@ -36,7 +36,7 @@ void test_non_alphanumeric_space_input() {
 
 void test_normal_input() {
   std::vector expected {"hello", "world", "test"};
-  std::vector actual {parse_params("hello, world, test")};
+  std::vector actual {parse_params("(hello, world, test)")};
 
   assert(actual.size() == expected.size());
   for (std::size_t i {0}; i < actual.size(); ++i) {
@@ -48,42 +48,23 @@ void test_normal_input() {
 }
 
 void test_normal_input_with_start_paren() {
-  std::vector expected {"hello", "world", "test"};
-  std::vector actual {parse_params("(hello, world, test")};
-
-  assert(actual.size() == expected.size());
-  for (std::size_t i {0}; i < actual.size(); ++i) {
-    if (actual[i] != expected[i]) {
-      std::cout << std::string("actual: ") + actual[i] + ", expected: " + expected[i];
-      std::abort();
-    }
+  try {
+    parse_params("(hello, world, test");
+  } catch (std::runtime_error& e) {
+    return;
   }
+
+  assert(false && "Expected to throw, but didn't!");
 }
 
 void test_normal_input_with_end_paren() {
-  std::vector expected {"hello", "world", "test"};
-  std::vector actual {parse_params("hello, world, test)")};
-
-  assert(actual.size() == expected.size());
-  for (std::size_t i {0}; i < actual.size(); ++i) {
-    if (actual[i] != expected[i]) {
-      std::cout << std::string("actual: ") + actual[i] + ", expected: " + expected[i];
-      std::abort();
-    }
+  try {
+    parse_params("hello, world, test)");
+  } catch (std::runtime_error& e) {
+    return;
   }
-}
 
-void test_normal_input_with_start_end_paren() {
-  std::vector expected {"hello", "world", "test"};
-  std::vector actual {parse_params("(hello, world, test)")};
-
-  assert(actual.size() == expected.size());
-  for (std::size_t i {0}; i < actual.size(); ++i) {
-    if (actual[i] != expected[i]) {
-      std::cout << std::string("actual: ") + actual[i] + ", expected: " + expected[i];
-      std::abort();
-    }
-  }
+  assert(false && "Expected to throw, but didn't!");
 }
 } // namespace util::string::parse_params_tests
 
@@ -92,4 +73,6 @@ int main() {
   util::string::parse_params_tests::test_non_ascii_input();
   util::string::parse_params_tests::test_non_alphanumeric_space_input();
   util::string::parse_params_tests::test_normal_input();
+  util::string::parse_params_tests::test_normal_input_with_start_paren();
+  util::string::parse_params_tests::test_normal_input_with_end_paren();
 }
