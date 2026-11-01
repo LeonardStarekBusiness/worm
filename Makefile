@@ -8,7 +8,7 @@ OBJ_FILES = $(SRC_FILES:src/%.cpp=build/%.o)
 
 all: $(NAME)
 
-build: 
+build:
 	mkdir -p build
 
 build/%.o: src/%.cpp | build
@@ -17,10 +17,10 @@ build/%.o: src/%.cpp | build
 $(NAME): $(OBJ_FILES)
 	$(CXX) $(CXXFLAGS) $(OBJ_FILES) -o $(NAME)
 
-clean: 
+clean:
 	rm -f $(OBJ_FILES)
 
-fclean: clean 
+fclean: clean
 	rm -f $(NAME)
 	rm -f *.tmp
 	rm -f vgcore*

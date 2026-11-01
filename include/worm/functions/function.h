@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace functions {
+namespace worm::functions {
 /*
  * `Function` example:
  * .worm:
@@ -24,8 +24,8 @@ namespace functions {
  */
 class Function {
 private:
-  /* 
-   * Sub-functions that this function should call sequentially 
+  /*
+   * Sub-functions that this function should call sequentially
    * Stored as pointers to improve performance
    */
   std::vector<Function*> sub_funcs;
@@ -33,24 +33,24 @@ private:
    * Mapping to assign the correct parameters provided in `operator()()`
    * to the sub-functions
    *
-   * Example: 
+   * Example:
    * If the first element in `param_mapping_` is [0, 2], it means that the
    * first function in `sub_funcs_` takes the first and third parameters
    * that are provided to `operator()()`
    */
   std::vector<std::vector<std::size_t>> param_mapping;
   /*
-  * Base function, used as entry point to introduce C++ functions to Worm
-  * Example use case: 
-  * to store the behavior of (.worm:) "print("Hello, world!")",
-  * you can instantiate following function: Function {wstd::print}
-  *
-  * It should always be the case that EITHER a base function exists 
-  * OR sub-functions and optional respective parameter mappings 
-  * (a base function should basically represent the lowest level function-kind
-  * and other functions should either be a base function 
-  * or build on top of those)
-  */
+   * Base function, used as entry point to introduce C++ functions to Worm
+   * Example use case:
+   * to store the behavior of (.worm:) "print("Hello, world!")",
+   * you can instantiate following function: Function {wstd::print}
+   *
+   * It should always be the case that EITHER a base function exists
+   * OR sub-functions and optional respective parameter mappings
+   * (a base function should basically represent the lowest level function-kind
+   * and other functions should either be a base function
+   * or build on top of those)
+   */
   void (*const base_func)(const std::vector<std::string>&) = nullptr;
 
 public:
@@ -62,6 +62,6 @@ public:
   bool operator==(const Function& other) const;
   bool operator!=(const Function& other) const;
 };
-}
+} // namespace worm::functions
 
 #endif // WORM_FUNCTIONS_FUNCTION_H

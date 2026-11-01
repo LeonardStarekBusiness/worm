@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace functions {
+namespace worm::functions {
 class Function;
 struct FunctionMapping;
 
@@ -32,6 +32,13 @@ extern std::unordered_map<std::string, Function> funcs;
  */
 Function decl_func(const std::string& func_decl_str);
 /*
+ * Creates a `FunctionMapping` out of a .worm input line and a parameter list
+ *
+ * Example:
+ * .worm: "print(a, x, z)
+ * input parameters: [a, b, c, x, y, z]
+ * output: FunctionMapping {.f: &wstd::print, .mapping: [0, 3, 5]}
+ *
  * @precondition: this function relies on the fact that the input line has
  * been trimmed before being passed
  *
@@ -44,6 +51,6 @@ Function decl_func(const std::string& func_decl_str);
  * in the input line and the parameter mapping that that function takes
  */
 FunctionMapping parse_func_mapping(std::string_view, const std::vector<std::string>);
-} // namespace functions
+} // namespace worm::functions
 
 #endif // WORM_FUNCTIONS_H

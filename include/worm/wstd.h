@@ -6,18 +6,18 @@
 
 /*
  * wstd stands for Worm-STandarD-library
- * 
- * Defines the direct interface between built-in worm commands and functions callable 
- * from C++ 
  *
- * Example: 
- * .worm: print(x) 
- * --delegate to--> .cpp: wstd::print(x) 
+ * Defines the direct interface between built-in worm commands and functions callable
+ * from C++
+ *
+ * Example:
+ * .worm: print(x)
+ * --delegate to--> .cpp: wstd::print(x)
  * --converts it into--> std::cout << x
  */
-namespace wstd {
+namespace worm::wstd {
 void print(const std::vector<std::string>&);
 void println(const std::vector<std::string>&);
-} // namespace wstd
+} // namespace worm::wstd
 
 #endif // WORM_WSTD_H

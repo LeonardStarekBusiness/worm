@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace wstd {
+namespace worm::wstd {
 void print(const std::vector<std::string>& params) {
   for (const auto& str : params) {
     std::cout << str;
@@ -16,4 +16,4 @@ void println(const std::vector<std::string>& params) {
 
   std::cout << '\n';
 }
-} // namespace wstd
+} // namespace worm::wstd

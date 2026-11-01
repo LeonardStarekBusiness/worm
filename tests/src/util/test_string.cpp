@@ -1,47 +1,51 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <format>
 #include <iostream>
 #include <stdexcept>
-#include <string>
 #include <vector>
 
 #include "worm/util/string.h"
 
-namespace util::string::parse_params_tests {
+namespace worm::util::string::parse_identifiers_tests {
 void test_empty_input() {
-  std::vector actual {parse_params("")};
+  std::vector actual {parse_identifiers("")};
   assert(actual.empty());
 }
 
 void test_non_ascii_input() {
   try {
-    parse_params("hello, world, ü");
-  } catch (std::runtime_error& e) {
-    assert(
-      e.what() == std::string("Error parsing parameters: contains invalid chars!")
-    );
+    parse_identifiers("hello, world, ü");
+  } catch (std::invalid_argument& e) {
+    return;
   }
+
+  assert(false && "Expected to throw, but didn't!");
 }
 
 void test_non_alphanumeric_space_input() {
   try {
-    parse_params("yeye, +, hlkj");
-  } catch (std::runtime_error& e) {
-    assert(
-      e.what() == std::string("Error parsing parameters: contains invalid chars!")
-    );
+    parse_identifiers("yeye, +, hlkj");
+  } catch (std::invalid_argument& e) {
+    return;
   }
+
+  assert(false && "Expected to throw, but didn't!");
 }
 
 void test_normal_input() {
   std::vector expected {"hello", "world", "test"};
-  std::vector actual {parse_params("(hello, world, test)")};
+  std::vector actual {parse_identifiers("(hello, world, test)")};
 
   assert(actual.size() == expected.size());
   for (std::size_t i {0}; i < actual.size(); ++i) {
     if (actual[i] != expected[i]) {
-      std::cout << std::string("actual: ") + actual[i] + ", expected: " + expected[i];
+      std::cout << std::format(
+        "\x1b[31mMismatch!\x1b[0m\tactual: '{}', expected: '{}'\n",
+        actual[i],
+        expected[i]
+      );
       std::abort();
     }
   }
@@ -49,8 +53,8 @@ void test_normal_input() {
 
 void test_normal_input_with_start_paren() {
   try {
-    parse_params("(hello, world, test");
-  } catch (std::runtime_error& e) {
+    parse_identifiers("(hello, world, test");
+  } catch (std::invalid_argument& e) {
     return;
   }
 
@@ -59,20 +63,22 @@ void test_normal_input_with_start_paren() {
 
 void test_normal_input_with_end_paren() {
   try {
-    parse_params("hello, world, test)");
-  } catch (std::runtime_error& e) {
+    parse_identifiers("hello, world, test)");
+  } catch (std::invalid_argument& e) {
     return;
   }
 
   assert(false && "Expected to throw, but didn't!");
 }
-} // namespace util::string::parse_params_tests
+} // namespace worm::util::string::parse_identifiers_tests
 
 int main() {
-  util::string::parse_params_tests::test_empty_input();
-  util::string::parse_params_tests::test_non_ascii_input();
-  util::string::parse_params_tests::test_non_alphanumeric_space_input();
-  util::string::parse_params_tests::test_normal_input();
-  util::string::parse_params_tests::test_normal_input_with_start_paren();
-  util::string::parse_params_tests::test_normal_input_with_end_paren();
+  worm::util::string::parse_identifiers_tests::test_empty_input();
+  worm::util::string::parse_identifiers_tests::test_non_ascii_input();
+  worm::util::string::parse_identifiers_tests::test_non_alphanumeric_space_input();
+  worm::util::string::parse_identifiers_tests::test_normal_input();
+  worm::util::string::parse_identifiers_tests::test_normal_input_with_start_paren();
+  worm::util::string::parse_identifiers_tests::test_normal_input_with_end_paren();
+
+  std::cout << "\x1b[32mAll tests for `worm::util::string` passed!\x1b[0m\n";
 }

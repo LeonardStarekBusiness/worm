@@ -6,11 +6,11 @@
 
 #include "worm/functions/function.h"
 
-namespace functions {
+namespace worm::functions {
 struct FunctionMapping {
   Function* f;
   std::vector<std::size_t> mapping;
 };
-} // namespace functions
+} // namespace worm::functions
 
 #endif // WORM_FUNCTIONS_FUNCTION_MAPPING_H
