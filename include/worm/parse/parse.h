@@ -2,6 +2,7 @@
 #define WORM_PARSE_PARSE_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "worm/parse/construct.h"
@@ -17,7 +18,7 @@ constexpr char str_delim {'"'};
  * @return: Returns an enum type that specifies the type of construct; it's value is
  * intended to be used at the callsite to choose how the parser should proceed
  */
-Construct determine_construct(const std::string&);
+Construct determine_construct(std::string_view);
 /*
  * @return: Returns `true` if given char can legally appear in
  * a .worm function signature, otherwise returns `false`

@@ -3,9 +3,11 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
-#include <iostream>
 #include <string_view>
+#include <vector>
 
+#include "worm/parse/construct.h"
+#include "worm/parse/keywords.h"
 #include "worm/parse/types.h"
 #include "worm/util/string.h"
 
@@ -62,6 +64,25 @@ std::size_t param_len(std::string_view sv) {
   }
 }
 } // namespace
+
+Construct determine_construct(std::string_view line) {
+  if (line.empty()) {
+    return Construct::None;
+  }
+
+  static const std::pair<const std::string_view, const Construct> map[] {
+    {keywords::condition, Construct::Condition},
+    {keywords::func_decl, Construct::FuncDecl}
+  };
+
+  for (const auto& [keyword, construct] : map) {
+    if (util::string::contains_keyword(keyword, line)) {
+      return construct;
+    }
+  }
+
+  return Construct::None;
+}
 
 bool is_identifier_char(char ch) {
   auto uch {static_cast<unsigned char>(ch)};

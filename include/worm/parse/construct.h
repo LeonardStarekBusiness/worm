@@ -3,9 +3,10 @@
 
 enum class Construct {
   Assignment,
+  Condition,
   FuncDecl,
   Loop,
-  If,
+  None
 };
 
 #endif // WORM_PARSE_CONSTRUCT_H
