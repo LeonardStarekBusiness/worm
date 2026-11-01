@@ -6,6 +6,8 @@
 #include <string_view>
 #include <vector>
 
+#include "worm/parse/parse.h"
+
 namespace worm::util::string {
 void trim(std::string& s) {
   std::size_t start {0};
@@ -45,5 +47,48 @@ std::vector<std::string> parse_list(
   }
 
   return params;
+}
+
+bool contains_keyword(std::string_view needle, std::string_view haystack) {
+  if (haystack.size() < needle.size()) {
+    return false;
+  }
+
+  if (
+    std::string_view {haystack.begin(), haystack.begin() + needle.size()} == needle
+    && (haystack.size() == needle.size() || std::isspace(haystack[needle.size()]))
+  ) {
+    return true;
+  }
+
+  bool in_str {false};
+  std::size_t idx {1};
+
+  while (idx + needle.size() < haystack.size()) {
+    if (haystack[idx] == parse::str_delim) {
+      in_str = !in_str;
+    }
+
+    if (
+      in_str || !std::isspace(haystack[idx - 1])
+      || !std::isspace(haystack[idx + needle.size()])
+    ) {
+      ++idx;
+      continue;
+    }
+
+    std::string_view cmp {
+      haystack.begin() + idx,
+      haystack.begin() + idx + needle.size()
+    };
+
+    if (cmp == needle) {
+      return true;
+    }
+
+    ++idx;
+  }
+
+  return needle == std::string_view {haystack.begin() + idx, haystack.end()};
 }
 } // namespace worm::util::string

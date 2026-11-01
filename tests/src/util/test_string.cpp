@@ -7,8 +7,10 @@
 #include <vector>
 
 #include "worm/parse/parse.h"
+#include "worm/util/string.h"
 
-namespace worm::util::string::parse_identifiers_tests {
+namespace worm::util::string {
+namespace parse_identifiers_tests {
 void test_empty_input() {
   std::vector actual {parse::parse_identifiers("")};
   assert(actual.empty());
@@ -70,7 +72,50 @@ void test_normal_input_with_end_paren() {
 
   assert(false && "Expected to throw, but didn't!");
 }
-} // namespace worm::util::string::parse_identifiers_tests
+} // namespace parse_identifiers_tests
+
+namespace contains_keyword_tests {
+void test_empty_haystack() {
+  assert(!contains_keyword("func", ""));
+}
+
+void test_slightly_small_keyword() {
+  assert(!contains_keyword("func", "fun"));
+}
+
+void test_should_contain_keyword() {
+  assert(contains_keyword("func", "hello this is a cool func to test!"));
+}
+
+void test_keyword_at_start() {
+  assert(contains_keyword("func", "func this is a cool hello to test!"));
+}
+
+void test_keyword_at_end() {
+  assert(contains_keyword("func", "test! this is a cool hello to func"));
+}
+
+void test_keyword_has_adjacent_char_at_tail() {
+  assert(!contains_keyword("func", "hello this is a cool funct to test!"));
+}
+
+void test_keyword_has_adjacent_char_at_head() {
+  assert(!contains_keyword("func", "hello this is a cool ffunc to test!"));
+}
+
+void test_keyword_has_adjacent_char_surrounding() {
+  assert(!contains_keyword("func", "hello this is a cool ffunction to test!"));
+}
+
+void test_keyword_is_in_string() {
+  assert(!contains_keyword("func", "hello this is \"a cool func to test\"!"));
+}
+
+void test_haystack_has_many_strings() {
+  assert(contains_keyword("func", "\"hello this\" is \"a cool func to test\" func!"));
+}
+} // namespace contains_keyword_tests
+} // namespace worm::util::string
 
 int main() {
   worm::util::string::parse_identifiers_tests::test_empty_input();
@@ -79,6 +124,17 @@ int main() {
   worm::util::string::parse_identifiers_tests::test_normal_input();
   worm::util::string::parse_identifiers_tests::test_normal_input_with_start_paren();
   worm::util::string::parse_identifiers_tests::test_normal_input_with_end_paren();
+
+  worm::util::string::contains_keyword_tests::test_empty_haystack();
+  worm::util::string::contains_keyword_tests::test_slightly_small_keyword();
+  worm::util::string::contains_keyword_tests::test_should_contain_keyword();
+  worm::util::string::contains_keyword_tests::test_keyword_at_start();
+  worm::util::string::contains_keyword_tests::test_keyword_at_end();
+  worm::util::string::contains_keyword_tests::test_keyword_has_adjacent_char_at_tail();
+  worm::util::string::contains_keyword_tests::test_keyword_has_adjacent_char_at_head();
+  worm::util::string::contains_keyword_tests::
+    test_keyword_has_adjacent_char_surrounding();
+  worm::util::string::contains_keyword_tests::test_keyword_is_in_string();
 
   std::cout << "\x1b[32mAll tests for `worm::util::string` passed!\x1b[0m\n";
 }

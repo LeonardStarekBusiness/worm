@@ -26,7 +26,7 @@ std::vector<std::string> validate_then_return_params(const std::string& signatur
   if (pos == std::string::npos) {
     throw std::invalid_argument(
       std::string("Error defining function: missing function declaration keyword ")
-      + "\"" + parse::keywords::func_decl + "\""
+      + "\"" + std::string(parse::keywords::func_decl) + "\""
     );
   }
 

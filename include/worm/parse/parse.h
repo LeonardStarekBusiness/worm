@@ -4,8 +4,20 @@
 #include <string>
 #include <vector>
 
+#include "worm/parse/construct.h"
+
 namespace worm::parse {
 constexpr char str_delim {'"'};
+/*
+ * Reads the given line and determines the exact construct of the line
+ *
+ * Edge cases: 
+ * Should ignore empty lines
+ * 
+ * @return: Returns an enum type that specifies the type of construct; it's value is
+ * intended to be used at the callsite to choose how the parser should proceed
+ */
+Construct determine_construct(const std::string&);
 /*
  * @return: Returns `true` if given char can legally appear in
  * a .worm function signature, otherwise returns `false`
@@ -41,5 +53,4 @@ std::vector<std::string> parse_identifiers(std::string_view);
  */
 std::vector<std::string> parse_params(std::string_view);
 } // namespace worm::parse
-
 #endif // WORM_PARSE_PARSE_H

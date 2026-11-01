@@ -25,6 +25,12 @@ std::vector<std::string> parse_list(
   std::size_t (*token_length)(std::string_view),
   bool (*is_token_char)(char)
 );
+/*
+ * Checks the "haystack" for the "needle".
+ * Note that the needle is not allowed to be inside string delimiters
+ * and that it must be surrounded by whitespaces to reduce ambiguity
+ */
+bool contains_keyword(std::string_view needle, std::string_view haystack);
 } // namespace worm::util::string
 
 #endif // WORM_UTIL_STRING_H
