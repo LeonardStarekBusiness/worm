@@ -6,12 +6,12 @@
 #include <cstddef>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include "worm/functions/function_mapping.h"
 #include "worm/functions/functions.h"
 #include "worm/parse/keywords.h"
+#include "worm/parse/parse.h"
 #include "worm/util/string.h"
 
 namespace worm::functions {
@@ -55,17 +55,19 @@ std::vector<std::string> validate_then_return_params(const std::string& signatur
   }
 
   try {
-    return util::string::parse_identifiers(
-      std::string_view {
-        signature.begin() + static_cast<std::string::difference_type>(pos),
-        signature.end()
-      }
-    );
-  } catch (std::invalid_argument& e) {
-    throw std::invalid_argument(
-      std::string("in validate_then_return_params(" + signature + "):\n") + e.what()
-    );
+return parse::parse_identifiers(
+  std::string_view {
+    signature.begin() + static_cast<std::string::difference_type>(pos),
+    signature.end()
   }
+);
+}
+
+catch (std::invalid_argument& e) {
+  throw std::invalid_argument(
+    std::string("in validate_then_return_params(" + signature + "):\n") + e.what()
+  );
+}
 }
 } // namespace
 

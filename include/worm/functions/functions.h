@@ -50,7 +50,7 @@ Function decl_func(const std::string& func_decl_str);
  * @return: returns a `FunctionMapping` which holds the referred-to function
  * in the input line and the parameter mapping that that function takes
  */
-FunctionMapping parse_func_mapping(std::string_view, const std::vector<std::string>);
+FunctionMapping parse_func_mapping(std::string_view, const std::vector<std::string>&);
 } // namespace worm::functions
 
 #endif // WORM_FUNCTIONS_H

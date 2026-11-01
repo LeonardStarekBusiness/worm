@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
-#include <iterator>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -12,10 +11,10 @@
 
 #include "worm/functions/function.h"
 #include "worm/functions/function_mapping.h"
-#include "worm/util/string.h"
+#include "worm/parse/parse.h"
 #include "worm/wstd.h"
 
-namespace functions {
+namespace worm::functions {
 std::unordered_map<std::string, Function> funcs {
   {"print", Function {&wstd::print}},
   {"println", Function {&wstd::println}}
@@ -53,7 +52,7 @@ FunctionMapping parse_func_mapping(
     );
   }
 
-  std::vector func_params {util::string::parse_params({func_name_end_it, line.end()})};
+  std::vector func_params {parse::parse_params({func_name_end_it, line.end()})};
   std::vector<std::size_t> mapping;
 
   for (const auto& param : func_params) {

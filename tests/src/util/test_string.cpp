@@ -6,17 +6,17 @@
 #include <stdexcept>
 #include <vector>
 
-#include "worm/util/string.h"
+#include "worm/parse/parse.h"
 
 namespace worm::util::string::parse_identifiers_tests {
 void test_empty_input() {
-  std::vector actual {parse_identifiers("")};
+  std::vector actual {parse::parse_identifiers("")};
   assert(actual.empty());
 }
 
 void test_non_ascii_input() {
   try {
-    parse_identifiers("hello, world, ü");
+    parse::parse_identifiers("hello, world, ü");
   } catch (std::invalid_argument& e) {
     return;
   }
@@ -26,7 +26,7 @@ void test_non_ascii_input() {
 
 void test_non_alphanumeric_space_input() {
   try {
-    parse_identifiers("yeye, +, hlkj");
+    parse::parse_identifiers("yeye, +, hlkj");
   } catch (std::invalid_argument& e) {
     return;
   }
@@ -36,7 +36,7 @@ void test_non_alphanumeric_space_input() {
 
 void test_normal_input() {
   std::vector expected {"hello", "world", "test"};
-  std::vector actual {parse_identifiers("(hello, world, test)")};
+  std::vector actual {parse::parse_identifiers("(hello, world, test)")};
 
   assert(actual.size() == expected.size());
   for (std::size_t i {0}; i < actual.size(); ++i) {
@@ -53,7 +53,7 @@ void test_normal_input() {
 
 void test_normal_input_with_start_paren() {
   try {
-    parse_identifiers("(hello, world, test");
+    parse::parse_identifiers("(hello, world, test");
   } catch (std::invalid_argument& e) {
     return;
   }
@@ -63,7 +63,7 @@ void test_normal_input_with_start_paren() {
 
 void test_normal_input_with_end_paren() {
   try {
-    parse_identifiers("hello, world, test)");
+    parse::parse_identifiers("hello, world, test)");
   } catch (std::invalid_argument& e) {
     return;
   }
