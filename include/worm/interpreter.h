@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <deque>
+#include <fstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -32,8 +33,10 @@ private:
    * loop point it should jump to on `continue` or when looping naturally
    */
   std::deque<std::pair<std::string, std::size_t>> loop_buf;
-
-  std::FILE file;
+  /*
+   * Input file (.worm)
+   */
+  std::ifstream file;
 };
 } // namespace worm
 

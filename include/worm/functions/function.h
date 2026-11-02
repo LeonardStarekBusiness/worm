@@ -1,6 +1,7 @@
 #ifndef WORM_FUNCTIONS_FUNCTION_H
 #define WORM_FUNCTIONS_FUNCTION_H
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -23,7 +24,23 @@ namespace worm::functions {
  *  -> sub_funcs_[2] (== sleep) uses announce()'s first param s
  */
 class Function {
+public:
+  Function(const std::vector<std::string>& lines);
+  Function(const std::string& name, void (*base_func)(const std::vector<std::string>&));
+
+  void operator()(const std::vector<std::string>&) const;
+
+  /*
+   * Used to return a hash that can be used as key to store the function 
+   * unambiguously in a data structure like a hashmap
+   */
+  std::string hash_code() const;
+
+  bool operator==(const Function& other) const;
+  bool operator!=(const Function& other) const;
+
 private:
+  std::string name;
   /*
    * Sub-functions that this function should call sequentially
    * Stored as pointers to improve performance
@@ -52,15 +69,6 @@ private:
    * or build on top of those)
    */
   void (*const base_func)(const std::vector<std::string>&) = nullptr;
-
-public:
-  Function(const std::vector<std::string>& lines);
-  Function(void (*base_func)(const std::vector<std::string>&));
-
-  void operator()(const std::vector<std::string>&) const;
-
-  bool operator==(const Function& other) const;
-  bool operator!=(const Function& other) const;
 };
 } // namespace worm::functions
 

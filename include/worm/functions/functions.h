@@ -6,8 +6,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "worm/functions/function.h"
+
 namespace worm::functions {
-class Function;
 struct FunctionMapping;
 
 /*
@@ -17,12 +18,13 @@ struct FunctionMapping;
  *
  * This map defines the source of truth which functions already exist and
  * should be used to prevent duplicate functions that would create ambiguity
+ *
+ * Key: `Function::hash_code`
+ * Value: (callable) `Function`
  */
 extern std::unordered_map<std::string, Function> funcs;
 
 /*
- * (NOT YET IMPLEMENTED, NOR FOUND THE PLACE WHERE THIS IS NEEDED)
- *
  * Interprets a function declaration in Worm and translates it to C++
  *
  * @throw: throws std::runtime_error if any interpretation error occurs
@@ -30,7 +32,7 @@ extern std::unordered_map<std::string, Function> funcs;
  *
  * @return: returns the `Function` that gets declared by this function
  */
-Function decl_func(const std::string& func_decl_str);
+Function def_func(const std::vector<std::string>&);
 /*
  * Creates a `FunctionMapping` out of a .worm input line and a parameter list
  *

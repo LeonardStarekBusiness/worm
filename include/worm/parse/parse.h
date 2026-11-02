@@ -1,6 +1,7 @@
 #ifndef WORM_PARSE_PARSE_H
 #define WORM_PARSE_PARSE_H
 
+#include <cstddef>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -53,5 +54,23 @@ std::vector<std::string> parse_identifiers(std::string_view);
  * and numeric constants (like 42.67, 69)
  */
 std::vector<std::string> parse_params(std::string_view);
+/*
+ * Counts the amount of chars from the beginning of the string view that belong to an
+ * identifier that starts from the start of the string view
+ *
+ * Example: 
+ * xyz, this_is_the_next_identifier -> identifier_len() would be 3
+ */
+std::size_t identifier_len(std::string_view);
+/*
+ * Counts the amount of chars from the beginning of the string view that belong to a
+ * parameter that starts from the start of the string view
+ *
+ * A parameter can be an identifier, a string constant, a numeric constant
+ *
+ * Example: 
+ * "str", 45, this_is_the_next_identifier" -> param_len() would be 5
+ */
+std::size_t param_len(std::string_view);
 } // namespace worm::parse
 #endif // WORM_PARSE_PARSE_H

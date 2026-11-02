@@ -12,7 +12,6 @@
 #include "worm/util/string.h"
 
 namespace worm::parse {
-namespace {
 std::size_t identifier_len(std::string_view sv) {
   std::size_t len {0};
   while (len < sv.size() && parse::is_identifier_char(sv[len])) {
@@ -63,11 +62,10 @@ std::size_t param_len(std::string_view sv) {
     return len;
   }
 }
-} // namespace
 
 Construct determine_construct(std::string_view line) {
   if (line.empty()) {
-    return Construct::None;
+    return Construct::Statement;
   }
 
   static const std::pair<const std::string_view, const Construct> map[] {
@@ -81,12 +79,12 @@ Construct determine_construct(std::string_view line) {
     }
   }
 
-  return Construct::None;
+  return Construct::Statement;
 }
 
 bool is_identifier_char(char ch) {
   auto uch {static_cast<unsigned char>(ch)};
-  return std::isalpha(uch);
+  return std::isalpha(uch) || uch == '_';
 }
 
 bool is_signature_char(char ch) {

@@ -16,15 +16,35 @@
 
 namespace worm::functions {
 std::unordered_map<std::string, Function> funcs {
-  {"print", Function {&wstd::print}},
-  {"println", Function {&wstd::println}}
+  {"print0", Function {"print", &wstd::print}},
+  {"println0", Function {"println", &wstd::println}}
 };
+
+Function def_func(const std::vector<std::string>& lines) {
+  try {
+    Function f {lines};
+    auto hash {f.hash_code()};
+
+    auto [it, inserted] = funcs.try_emplace(hash, std::move(f));
+    if (!inserted) {
+      throw std::invalid_argument(
+        "Error declaring function with hash '" + hash + "': function already exists!"
+      );
+    }
+
+    return it->second;
+  } catch (std::invalid_argument& e) {
+    throw std::invalid_argument(
+      std::string("In `worm::functions::def_func()`:\n") + e.what()
+    );
+  }
+}
 
 /*
  * Currently only parses a single-function-statement and doesn't handle nested function
  * calls or expressions for that matter
  *
- * Not handling nested function calls is sensible at this state as functions with 
+ * Not handling nested function calls is sensible at this state as functions with
  * return types aren't implemented yet to begin with
  */
 FunctionMapping parse_func_mapping(
@@ -44,7 +64,8 @@ FunctionMapping parse_func_mapping(
   }
 
   std::string func_name {line.begin(), func_name_end_it};
-  auto func_it {funcs.find(func_name)};
+  std::vector func_params {parse::parse_params({func_name_end_it, line.end()})};
+  auto func_it {funcs.find({func_name, func_params.size()})};
 
   if (func_it == funcs.end()) {
     throw std::runtime_error(
@@ -52,20 +73,26 @@ FunctionMapping parse_func_mapping(
     );
   }
 
-  std::vector func_params {parse::parse_params({func_name_end_it, line.end()})};
   std::vector<std::size_t> mapping;
-
   for (const auto& param : func_params) {
     auto it {std::find(params.begin(), params.end(), param)};
-    if (it == params.end()) {
+    if (it != params.end()) {
+      mapping.push_back(static_cast<std::size_t>(std::distance(params.begin(), it)));
+      continue;
+    }
+
+    if (parse::identifier_len(param) == param.size()) {
       throw std::runtime_error(
         "Error parsing statement: use of undeclared identifier '" + param + "'!"
       );
     }
 
-    mapping.push_back(static_cast<std::size_t>(std::distance(params.begin(), it)));
+    throw std::logic_error(
+      "TODO: Implement behavior when a function takes a constant as argument"
+      // mapping.push_back(-1);
+    );
   }
 
   return {&func_it->second, mapping};
 }
-} // namespace functions
+} // namespace worm::functions

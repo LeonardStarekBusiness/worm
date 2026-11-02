@@ -6,7 +6,7 @@ enum class Construct {
   Condition,
   FuncDecl,
   Loop,
-  None
+  Statement,
 };
 
 #endif // WORM_PARSE_CONSTRUCT_H

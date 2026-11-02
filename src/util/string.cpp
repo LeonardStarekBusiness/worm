@@ -1,5 +1,6 @@
 #include "worm/util/string.h"
 
+#include <algorithm>
 #include <cctype>
 #include <cstddef>
 #include <string>
@@ -9,6 +10,11 @@
 #include "worm/parse/parse.h"
 
 namespace worm::util::string {
+bool isspace(char ch) {
+  auto uch {static_cast<unsigned char>(ch)};
+  return std::isspace(uch);
+}
+
 void trim(std::string& s) {
   std::size_t start {0};
   while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) {
@@ -26,6 +32,18 @@ void trim(std::string& s) {
   }
 
   s.erase(0, start);
+}
+
+std::string_view trimmed_view(const std::string& s) {
+  auto start {std::find_if(s.begin(), s.end(), [](auto ch) {
+    return !isspace(ch);
+  })};
+
+  auto end_incl {std::find_if(s.rbegin(), s.rend(), [](auto ch) {
+    return !isspace(ch);
+  })};
+
+  return std::string_view {start, end_incl.base()};
 }
 
 std::vector<std::string> parse_list(
@@ -90,5 +108,15 @@ bool contains_keyword(std::string_view needle, std::string_view haystack) {
   }
 
   return needle == std::string_view {haystack.begin() + idx, haystack.end()};
+}
+
+std::size_t indent_lvl(const std::string& s) {
+  for (std::size_t i {0}; i < s.size(); ++i) {
+    if (!isspace(s[i])) {
+      return i;
+    }
+  }
+
+  return s.size();
 }
 } // namespace worm::util::string

@@ -6,12 +6,18 @@
 #include <vector>
 
 namespace worm::util::string {
+bool isspace(char ch);
 /*
- * Removes any leading or trailing whitespaces
+ * Removes leading or trailing whitespaces
  */
 void trim(std::string&);
 /*
- * Parses a comma-separated list according to @param token_length and 
+ * Provides a view into the input string, but without the leading or
+ * trailing whitespaces
+ */
+std::string_view trimmed_view(const std::string&);
+/*
+ * Parses a comma-separated list according to @param token_length and
  * @param is_token_char
  *
  * @param: Takes a string_view as the buffer to parse, additionally to:
@@ -31,6 +37,7 @@ std::vector<std::string> parse_list(
  * and that it must be surrounded by whitespaces to reduce ambiguity
  */
 bool contains_keyword(std::string_view needle, std::string_view haystack);
+std::size_t indent_lvl(const std::string&);
 } // namespace worm::util::string
 
 #endif // WORM_UTIL_STRING_H
