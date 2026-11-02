@@ -12,7 +12,7 @@
 namespace worm {
 class Interpreter {
 public:
-  Interpreter(std::vector<std::string>);
+  Interpreter(const std::vector<std::string>&);
 
   void run();
 

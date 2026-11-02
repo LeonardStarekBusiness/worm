@@ -8,8 +8,10 @@
 
 namespace worm::functions {
 struct FunctionMapping {
+  static FunctionMapping noop();
+
   Function* f;
-  std::vector<std::size_t> mapping;
+  std::vector<std::pair<std::string, std::size_t>> mapping;
 };
 } // namespace worm::functions
 

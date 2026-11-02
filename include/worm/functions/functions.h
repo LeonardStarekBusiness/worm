@@ -3,13 +3,19 @@
 
 #include <cstddef>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
 #include "worm/functions/function.h"
+#include "worm/functions/function_mapping.h"
 
 namespace worm::functions {
-struct FunctionMapping;
+/*
+ * Used to handle NO-OPs (e.g. when an empty line occurs, this might help, depending on
+ * parser implementation)
+ */
+extern Function noop_func;
 
 /*
  * Used to keep track of all the Worm-functions declared at runtime or of
@@ -24,6 +30,14 @@ struct FunctionMapping;
  */
 extern std::unordered_map<std::string, Function> funcs;
 
+/*
+ * Substitutes all of the map's keys with their values and leaves other variables alone,
+ * then exectues the resulting statement
+ */
+void substitute_execute(
+  std::string_view,
+  std::unordered_map<std::string, std::string>&
+);
 /*
  * Interprets a function declaration in Worm and translates it to C++
  *
@@ -51,6 +65,9 @@ Function def_func(const std::vector<std::string>&);
  *
  * @return: returns a `FunctionMapping` which holds the referred-to function
  * in the input line and the parameter mapping that that function takes
+ *
+ * Edge cases:
+ * If an empty string view is passed, returns the mapping of `noop_func`
  */
 FunctionMapping parse_func_mapping(std::string_view, const std::vector<std::string>&);
 } // namespace worm::functions

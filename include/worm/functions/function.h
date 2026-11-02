@@ -55,7 +55,7 @@ private:
    * first function in `sub_funcs_` takes the first and third parameters
    * that are provided to `operator()()`
    */
-  std::vector<std::vector<std::size_t>> param_mapping;
+  std::vector<std::vector<std::pair<std::string, std::size_t>>> param_mapping;
   /*
    * Base function, used as entry point to introduce C++ functions to Worm
    * Example use case:

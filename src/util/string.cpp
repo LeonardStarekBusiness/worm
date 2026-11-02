@@ -46,6 +46,18 @@ std::string_view trimmed_view(const std::string& s) {
   return std::string_view {start, end_incl.base()};
 }
 
+std::string_view trimmed_view(std::string_view sv) {
+  auto start {std::find_if(sv.begin(), sv.end(), [](auto ch) {
+    return !isspace(ch);
+  })};
+
+  auto end_incl {std::find_if(sv.rbegin(), sv.rend(), [](auto ch) {
+    return !isspace(ch);
+  })};
+
+  return std::string_view {start, end_incl.base()};
+}
+
 std::vector<std::string> parse_list(
   std::string_view sv,
   std::size_t (*token_length)(std::string_view),
@@ -57,8 +69,18 @@ std::vector<std::string> parse_list(
     std::string param {sv.begin(), sv.begin() + ilen};
     params.push_back(param);
 
+    bool comma_separated {false};
     while (ilen < sv.size() && !is_token_char(sv[ilen])) {
+      if (comma_separated && sv[ilen] == ',') {
+        throw std::invalid_argument("Error parsing list: redundant comma!");
+      }
+
+      comma_separated |= sv[ilen] == ',';
       ++ilen;
+    }
+
+    if (ilen < sv.size() && !comma_separated) {
+      throw std::invalid_argument("Error parsing list: missing comma!");
     }
 
     sv = {sv.begin() + ilen, sv.end()};

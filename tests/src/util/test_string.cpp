@@ -72,6 +72,26 @@ void test_normal_input_with_end_paren() {
 
   assert(false && "Expected to throw, but didn't!");
 }
+
+void test_input_with_missing_comma() {
+  try {
+    parse::parse_identifiers("(hello, world test)");
+  } catch (std::invalid_argument& e) {
+    return;
+  }
+
+  assert(false && "Expected to throw, but didn't!");
+}
+
+void test_input_with_redundant_comma() {
+  try {
+    parse::parse_identifiers("(hello, world,, test)");
+  } catch (std::invalid_argument& e) {
+    return;
+  }
+
+  assert(false && "Expected to throw, but didn't!");
+}
 } // namespace parse_identifiers_tests
 
 namespace contains_keyword_tests {
@@ -117,24 +137,26 @@ void test_haystack_has_many_strings() {
 } // namespace contains_keyword_tests
 } // namespace worm::util::string
 
-int main() {
-  worm::util::string::parse_identifiers_tests::test_empty_input();
-  worm::util::string::parse_identifiers_tests::test_non_ascii_input();
-  worm::util::string::parse_identifiers_tests::test_non_alphanumeric_space_input();
-  worm::util::string::parse_identifiers_tests::test_normal_input();
-  worm::util::string::parse_identifiers_tests::test_normal_input_with_start_paren();
-  worm::util::string::parse_identifiers_tests::test_normal_input_with_end_paren();
+using namespace worm::util::string;
 
-  worm::util::string::contains_keyword_tests::test_empty_haystack();
-  worm::util::string::contains_keyword_tests::test_slightly_small_keyword();
-  worm::util::string::contains_keyword_tests::test_should_contain_keyword();
-  worm::util::string::contains_keyword_tests::test_keyword_at_start();
-  worm::util::string::contains_keyword_tests::test_keyword_at_end();
-  worm::util::string::contains_keyword_tests::test_keyword_has_adjacent_char_at_tail();
-  worm::util::string::contains_keyword_tests::test_keyword_has_adjacent_char_at_head();
-  worm::util::string::contains_keyword_tests::
-    test_keyword_has_adjacent_char_surrounding();
-  worm::util::string::contains_keyword_tests::test_keyword_is_in_string();
+int main() {
+  parse_identifiers_tests::test_empty_input();
+  parse_identifiers_tests::test_non_ascii_input();
+  parse_identifiers_tests::test_non_alphanumeric_space_input();
+  parse_identifiers_tests::test_normal_input();
+  parse_identifiers_tests::test_normal_input_with_start_paren();
+  parse_identifiers_tests::test_normal_input_with_end_paren();
+  parse_identifiers_tests::test_input_with_missing_comma();
+
+  contains_keyword_tests::test_empty_haystack();
+  contains_keyword_tests::test_slightly_small_keyword();
+  contains_keyword_tests::test_should_contain_keyword();
+  contains_keyword_tests::test_keyword_at_start();
+  contains_keyword_tests::test_keyword_at_end();
+  contains_keyword_tests::test_keyword_has_adjacent_char_at_tail();
+  contains_keyword_tests::test_keyword_has_adjacent_char_at_head();
+  contains_keyword_tests::test_keyword_has_adjacent_char_surrounding();
+  contains_keyword_tests::test_keyword_is_in_string();
 
   std::cout << "\x1b[32mAll tests for `worm::util::string` passed!\x1b[0m\n";
 }

@@ -2,7 +2,9 @@
 
 #include <cctype>
 #include <cstddef>
+#include <exception>
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -13,8 +15,26 @@
 #include "worm/util/string.h"
 
 namespace worm {
-Interpreter::Interpreter(std::vector<std::string> args) : args {args} {
-  if (args.empty() || !args[0].ends_with(".worm")) {
+namespace {
+std::ifstream& nextline_check_indent(
+  std::ifstream& file,
+  std::string& buf,
+  std::size_t& indent_lvl,
+  const std::size_t indent_width
+) {
+  std::getline(file, buf);
+  indent_lvl = util::string::indent_lvl(buf);
+
+  if (indent_lvl % indent_width) {
+    throw std::invalid_argument("Error reading .worm source code: sloppy indentation!");
+  }
+
+  return file;
+}
+} // namespace
+
+Interpreter::Interpreter(const std::vector<std::string>& args) : args {args} {
+  if (args.size() < 2 || !args[1].ends_with(".worm")) {
     throw std::invalid_argument(
       "Error initalizing interpreter: No .worm file to execute!"
     );
@@ -25,77 +45,68 @@ Interpreter::Interpreter(std::vector<std::string> args) : args {args} {
    * for flags that can be passed to the interpreter
    */
 
-  file = std::ifstream {args[0]};
+  file = std::ifstream {args[1]};
   if (!file) {
     throw std::runtime_error(
-      "Error initializing interpreter: Couldn't open file '" + args[0] + "'!"
+      "Error initializing interpreter: Couldn't open file '" + args[1] + "'!"
     );
   }
 }
 
 void Interpreter::run() {
-  const std::size_t indent_width {4};
+  const std::size_t indent_width {2};
   std::size_t indent_lvl {0};
+  [[maybe_unused]]
+  std::size_t line_pos {1};
   std::string line;
   bool reread_line {false};
   std::ifstream::pos_type last_pos {};
 
-  while (std::getline(file, line)) {
-    if (reread_line) {
-      file.clear();
-      file.seekg(last_pos);
-      reread_line = false;
-    }
+  try {
+    while (nextline_check_indent(file, line, indent_lvl, indent_width)) {
+      if (reread_line) {
+        file.clear();
+        file.seekg(last_pos);
+        reread_line = false;
+      }
 
-    if (line.empty()) {
-      continue;
-    }
+      ++line_pos;
+      if (line.empty()) {
+        continue;
+      }
 
-    if (
-      auto cur_indent {util::string::indent_lvl(line)}; !(cur_indent % indent_width)
-    ) {
-      throw std::invalid_argument(
-        "Error reading .worm source code: sloppy indentation!"
-      );
-    }
+      switch (parse::determine_construct(line)) {
+        case Construct::FuncDecl: {
+          std::vector func_def_lines {line};
+          std::size_t base_indent_lvl {indent_lvl};
 
-    switch (parse::determine_construct(line)) {
-      case Construct::FuncDecl: {
-        std::vector func_def_lines {line};
-        std::size_t base_indent_lvl {indent_lvl};
+          while (nextline_check_indent(file, line, indent_lvl, indent_width)) {
+            if (line.empty()) {
+              continue;
+            }
 
-        while (
-          std::getline(file, line) && util::string::indent_lvl(line) >= base_indent_lvl
-        ) {
-          if (line.empty()) {
-            continue;
+            auto cur_indent {util::string::indent_lvl(line)};
+            if (cur_indent <= base_indent_lvl) {
+              last_pos = file.tellg();
+              reread_line = true;
+              break;
+            }
+
+            ++line_pos;
+            func_def_lines.push_back(line);
           }
 
-          auto cur_indent {util::string::indent_lvl(line)};
-          if (!(cur_indent % indent_width)) {
-            throw std::invalid_argument(
-              "Error reading .worm source code: sloppy indentation!"
-            );
-          }
-
-          if (cur_indent >= base_indent_lvl) {
-            last_pos = file.tellg();
-            reread_line = true;
-            break;
-          }
-
-          func_def_lines.push_back(line);
+          functions::def_func(func_def_lines);
+          break;
         }
-
-        functions::def_func(func_def_lines);
-        break;
+        case Construct::Statement: {
+          functions::substitute_execute(line, vars);
+        }
+        default: throw std::logic_error("not yet implemented!");
       }
-      case Construct::Statement: {
-
-        break;
-      }
-      default: throw std::logic_error("not yet implemented!");
     }
+  } catch (std::exception& e) {
+    throw std::runtime_error("At line " + std::to_string(line_pos) + ":\n" + e.what());
   }
 }
 } // namespace worm

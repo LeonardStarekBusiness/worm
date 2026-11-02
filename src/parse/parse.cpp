@@ -103,14 +103,20 @@ std::vector<std::string> parse_identifiers(std::string_view sv) {
   }
 
   if (sv.front() != '(' || sv.back() != ')') {
-    throw std::invalid_argument("Error parsing parameters: missing outer parentheses!");
+    throw std::invalid_argument(
+      std::string {"Error parsing parameters: missing outer parentheses!\n"}
+      + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
+    );
   }
 
   sv = {sv.begin() + 1, sv.end() - 1};
   bool invalid_chars {!std::all_of(sv.begin(), sv.end(), parse::is_signature_char)};
 
   if (invalid_chars) {
-    throw std::invalid_argument("Error parsing parameters: contains invalid chars!");
+    throw std::invalid_argument(
+      std::string {"Error parsing parameters: contains invalid chars!\n"}
+      + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
+    );
   }
 
   return util::string::parse_list(sv, identifier_len, parse::is_identifier_char);
@@ -122,7 +128,10 @@ std::vector<std::string> parse_params(std::string_view sv) {
   }
 
   if (sv.front() != '(' || sv.back() != ')') {
-    throw std::invalid_argument("Error parsing parameters: missing outer parentheses!");
+    throw std::invalid_argument(
+      std::string {"Error parsing parameters: missing outer parentheses!\n"}
+      + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
+    );
   }
 
   sv = {sv.begin() + 1, sv.end() - 1};

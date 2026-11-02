@@ -44,7 +44,7 @@ std::vector<std::string> validate_then_return_params(std::string_view signature)
     pos < signature.size() && !std::isspace(static_cast<unsigned char>(signature[pos]))
     && signature[pos] != '('
   ) {
-    func_name.push_back(signature[pos]);
+    func_name.push_back(signature[pos++]);
   }
 
   if (func_name.empty()) {
@@ -118,9 +118,14 @@ void Function::operator()(const std::vector<std::string>& params) const {
 
   std::size_t max_param_idx {0};
   for (const auto& vec : param_mapping) {
-    const auto& it {std::max_element(vec.begin(), vec.end())};
+    const auto& it {
+      std::max_element(vec.begin(), vec.end(), [](const auto& lop, const auto& rop) {
+        return lop.second < rop.second;
+      })
+    };
+
     if (it != vec.end()) {
-      max_param_idx = std::max(*it, max_param_idx);
+      max_param_idx = std::max(it->second, max_param_idx);
     }
   }
 
@@ -133,9 +138,8 @@ void Function::operator()(const std::vector<std::string>& params) const {
 
   std::vector<std::string> cur_params;
   for (std::size_t i {0}; i < sub_funcs.size(); ++i) {
-    for (const auto& idx : param_mapping[i]) {
-
-      cur_params.push_back(params[idx]);
+    for (const auto& [constant, map_idx] : param_mapping[i]) {
+      cur_params.push_back(constant.empty() ? params[map_idx] : constant);
     }
 
     (*sub_funcs[i])(cur_params);
@@ -150,12 +154,17 @@ std::string Function::hash_code() const {
 
   int max_param_idx {-1};
   for (const auto& vec : param_mapping) {
-    auto max_it {std::max_element(vec.begin(), vec.end())};
+    auto max_it {
+      std::max_element(vec.begin(), vec.end(), [](const auto& lop, const auto& rop) {
+        return lop.second < rop.second;
+      })
+    };
+
     if (max_it == vec.end()) {
       continue;
     }
 
-    max_param_idx = std::max(static_cast<int>(*max_it), max_param_idx);
+    max_param_idx = std::max(static_cast<int>(max_it->second), max_param_idx);
   }
 
   return name + std::to_string(max_param_idx + 1);
