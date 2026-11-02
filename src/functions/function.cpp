@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cctype>
 #include <cstddef>
+#include <iostream>
 #include <iterator>
 #include <stdexcept>
 #include <string>
@@ -24,27 +25,29 @@ namespace {
  *
  * @return: returns the parameters to this function in the original order
  */
-std::vector<std::string> validate_then_return_params(std::string_view signature) {
-  auto pos {signature.find(parse::keywords::func_decl)};
-  if (pos == std::string::npos) {
+std::pair<std::string, std::vector<std::string>> validate_then_return_params(
+  std::string_view signature
+) {
+  if (!signature.starts_with(parse::keywords::func_decl)) {
     throw std::invalid_argument(
       std::string("Error defining function: missing function declaration keyword ")
       + "\"" + std::string(parse::keywords::func_decl) + "\""
     );
   }
 
+  std::size_t idx {parse::keywords::func_decl.size()};
   while (
-    pos < signature.size() && std::isspace(static_cast<unsigned char>(signature[pos]))
+    idx < signature.size() && std::isspace(static_cast<unsigned char>(signature[idx]))
   ) {
-    ++pos;
+    ++idx;
   }
 
   std::string func_name;
   while (
-    pos < signature.size() && !std::isspace(static_cast<unsigned char>(signature[pos]))
-    && signature[pos] != '('
+    idx < signature.size() && !std::isspace(static_cast<unsigned char>(signature[idx]))
+    && signature[idx] != '('
   ) {
-    func_name.push_back(signature[pos++]);
+    func_name.push_back(signature[idx++]);
   }
 
   if (func_name.empty()) {
@@ -52,18 +55,21 @@ std::vector<std::string> validate_then_return_params(std::string_view signature)
   }
 
   while (
-    pos < signature.size() && std::isspace(static_cast<unsigned char>(signature[pos]))
+    idx < signature.size() && std::isspace(static_cast<unsigned char>(signature[idx]))
   ) {
-    ++pos;
+    ++idx;
   }
 
   try {
-    return parse::parse_identifiers(
-      std::string_view {
-        signature.begin() + static_cast<std::string::difference_type>(pos),
-        signature.end()
-      }
-    );
+    return {
+      func_name,
+      parse::parse_identifiers(
+        std::string_view {
+          signature.begin() + static_cast<std::string::difference_type>(idx),
+          signature.end()
+        }
+      )
+    };
   } catch (std::invalid_argument& e) {
     throw std::invalid_argument(
       std::string("in validate_then_return_params(" + std::string(signature) + "):\n")
@@ -91,7 +97,7 @@ Function::Function(const std::vector<std::string>& lines) {
     util::string::trimmed_view
   );
 
-  std::vector params {validate_then_return_params(trimmed[0])};
+  auto [func_name, params] {validate_then_return_params(trimmed[0])};
   for (std::size_t i {1}; i < trimmed.size(); ++i) {
     auto [func, mapping] {parse_func_mapping(lines[i], params)};
     sub_funcs.push_back(func);
@@ -99,41 +105,32 @@ Function::Function(const std::vector<std::string>& lines) {
   }
 
   assert(sub_funcs.size() == param_mapping.size() && !base_func);
+  name = func_name;
+  param_count = params.size();
 }
 
 Function::Function(
   const std::string& name,
+  std::size_t param_count,
   void (*base_func)(const std::vector<std::string>&)
 )
     : name {name}
+    , param_count {param_count}
     , base_func {base_func} {
   assert(sub_funcs.empty() && param_mapping.empty());
 }
 
 void Function::operator()(const std::vector<std::string>& params) const {
+  if (param_count < params.size()) {
+    throw std::invalid_argument(
+      "Function requires " + std::to_string(param_count) + " parameters,"
+      " but only " + std::to_string(params.size()) + " were provided!"
+    );
+  }
+
   if (base_func) {
     base_func(params);
     return;
-  }
-
-  std::size_t max_param_idx {0};
-  for (const auto& vec : param_mapping) {
-    const auto& it {
-      std::max_element(vec.begin(), vec.end(), [](const auto& lop, const auto& rop) {
-        return lop.second < rop.second;
-      })
-    };
-
-    if (it != vec.end()) {
-      max_param_idx = std::max(it->second, max_param_idx);
-    }
-  }
-
-  if (std::cmp_greater_equal(max_param_idx, params.size())) {
-    throw std::invalid_argument(
-      "Function requires " + std::to_string(max_param_idx + 1) + " parameters,"
-      " but only " + std::to_string(params.size()) + " were provided!"
-    );
   }
 
   std::vector<std::string> cur_params;
@@ -148,26 +145,7 @@ void Function::operator()(const std::vector<std::string>& params) const {
 }
 
 std::string Function::hash_code() const {
-  if (base_func) {
-    return {name, 0};
-  }
-
-  int max_param_idx {-1};
-  for (const auto& vec : param_mapping) {
-    auto max_it {
-      std::max_element(vec.begin(), vec.end(), [](const auto& lop, const auto& rop) {
-        return lop.second < rop.second;
-      })
-    };
-
-    if (max_it == vec.end()) {
-      continue;
-    }
-
-    max_param_idx = std::max(static_cast<int>(max_it->second), max_param_idx);
-  }
-
-  return name + std::to_string(max_param_idx + 1);
+  return name + std::to_string(param_count);
 }
 
 bool Function::operator==(const Function& other) const {

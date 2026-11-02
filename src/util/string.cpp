@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>

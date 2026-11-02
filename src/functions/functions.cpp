@@ -1,9 +1,9 @@
 #include "worm/functions/functions.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstddef>
 #include <format>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -21,12 +21,12 @@ namespace {
 void noop(const std::vector<std::string>&) {}
 } // namespace
 
-Function noop_func {"__noop", &noop};
+Function noop_func {"__noop", 0, &noop};
 
 std::unordered_map<std::string, Function> funcs {
   {noop_func.hash_code(), noop_func},
-  {"print0", Function {"print", &wstd::print}},
-  {"println0", Function {"println", &wstd::println}}
+  {"print1", Function {"print", 1, &wstd::print}},
+  {"println1", Function {"println", 1, &wstd::println}}
 };
 
 void substitute_execute(
@@ -45,7 +45,16 @@ void substitute_execute(
   std::string func_name {sv.begin(), func_name_end_it};
   util::string::trim(func_name);
 
-  std::vector params {parse::parse_params({sv.begin(), func_name_end_it})};
+  std::vector<std::string> params;
+  try {
+    params = parse::parse_params({func_name_end_it, sv.end()});
+  } catch (std::invalid_argument& e) {
+    throw std::invalid_argument(
+      std::format("in `worm::functions::substitute_execute({})`:\n{}", sv, e.what())
+    );
+  }
+
+  /* Simulates `Function::hash_code()` */
   func_name += std::to_string(params.size());
 
   auto func_it {funcs.find(func_name)};
@@ -120,6 +129,8 @@ FunctionMapping parse_func_mapping(
       std::format("in `worm::functions::parse_func_mapping()`:\n{}", e.what())
     );
   }
+
+  func_name += std::to_string(func_params.size());
 
   std::vector<std::pair<std::string, std::size_t>> mapping;
   for (const auto& param : func_params) {

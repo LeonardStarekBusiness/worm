@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -114,7 +115,7 @@ std::vector<std::string> parse_identifiers(std::string_view sv) {
 
   if (invalid_chars) {
     throw std::invalid_argument(
-      std::string {"Error parsing parameters: contains invalid chars!\n"}
+      std::string {"Error parsing identifiers: contains invalid chars!\n"}
       + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
     );
   }

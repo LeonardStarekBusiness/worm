@@ -1,6 +1,5 @@
 #include "worm/interpreter.h"
 
-#include <cctype>
 #include <cstddef>
 #include <exception>
 #include <fstream>
@@ -57,7 +56,7 @@ void Interpreter::run() {
   const std::size_t indent_width {2};
   std::size_t indent_lvl {0};
   [[maybe_unused]]
-  std::size_t line_pos {1};
+  std::size_t line_pos {0};
   std::string line;
   bool reread_line {false};
   std::ifstream::pos_type last_pos {};
@@ -67,6 +66,7 @@ void Interpreter::run() {
       if (reread_line) {
         file.clear();
         file.seekg(last_pos);
+        nextline_check_indent(file, line, indent_lvl, indent_width);
         reread_line = false;
       }
 
@@ -81,19 +81,21 @@ void Interpreter::run() {
           std::size_t base_indent_lvl {indent_lvl};
 
           while (nextline_check_indent(file, line, indent_lvl, indent_width)) {
+            ++line_pos;
             if (line.empty()) {
+              last_pos = file.tellg();
               continue;
             }
 
             auto cur_indent {util::string::indent_lvl(line)};
             if (cur_indent <= base_indent_lvl) {
-              last_pos = file.tellg();
               reread_line = true;
+              --line_pos;
               break;
             }
 
-            ++line_pos;
             func_def_lines.push_back(line);
+            last_pos = file.tellg();
           }
 
           functions::def_func(func_def_lines);
@@ -101,6 +103,7 @@ void Interpreter::run() {
         }
         case Construct::Statement: {
           functions::substitute_execute(line, vars);
+          break;
         }
         default: throw std::logic_error("not yet implemented!");
       }

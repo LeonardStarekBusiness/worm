@@ -1,10 +1,14 @@
 func announce ()
-  print("Hey!")
-  print("This is a test!")
+  println("Hey!")
+  println("This is a test!")
+  println("This works now!")
 
 func quit ()
-  print("The end is near.")
-  print("Quitting...")
+  println("The end is near.")
+  println("Quitting...")
+
+
+  println("Or are we really?\n")
 
 announce()
 quit()

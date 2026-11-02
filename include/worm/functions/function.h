@@ -26,12 +26,16 @@ namespace worm::functions {
 class Function {
 public:
   Function(const std::vector<std::string>& lines);
-  Function(const std::string& name, void (*base_func)(const std::vector<std::string>&));
+  Function(
+    const std::string& name,
+    std::size_t param_count,
+    void (*base_func)(const std::vector<std::string>&)
+  );
 
   void operator()(const std::vector<std::string>&) const;
 
   /*
-   * Used to return a hash that can be used as key to store the function 
+   * Used to return a hash that can be used as key to store the function
    * unambiguously in a data structure like a hashmap
    */
   std::string hash_code() const;
@@ -41,6 +45,7 @@ public:
 
 private:
   std::string name;
+  std::size_t param_count;
   /*
    * Sub-functions that this function should call sequentially
    * Stored as pointers to improve performance
