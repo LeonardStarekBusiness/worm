@@ -52,6 +52,12 @@ Interpreter::Interpreter(const std::vector<std::string>& args) : args {args} {
   }
 }
 
+/*
+ * Currently no checks are performed whether the indentation is exactly valid
+ * Only checks whether the indendation is overall valid (divisor of `indent_width`
+ * and blocks are considered closed whenever indentation falls back to the block-opening
+ * indentation or less
+ */
 void Interpreter::run() {
   const std::size_t indent_width {2};
   std::size_t indent_lvl {0};

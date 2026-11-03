@@ -1,6 +1,3 @@
-#include "worm/worm.h"
-
-#include <cstddef>
 #include <exception>
 #include <iostream>
 #include <string>
@@ -29,18 +26,4 @@ int main(int argc, const char** argv) {
     std::cout << e.what() << std::endl;
     return 1;
   }
-
-  /*
-  if (!(ac == 2 || (ac == 3 && av[2] == std::string("--prep")))) {
-    return 1;
-  }
-  try {
-    Program baal(av[1], ac == 3);
-    baal.preprocess();
-    baal.execute();
-  } catch (std::runtime_error& e) {
-    std::cout << e.what() << std::endl;
-    return 1;
-  }
-  */
 }
