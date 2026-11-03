@@ -4,12 +4,17 @@ func announce ()
   println("This works now!")
 
 func quit ()
+  println("")
   println("The end is near.")
   println("Quitting...")
 
 
   println("Or are we really?\n")
 
+func this_is_it()
+  println("I mean, this is it, no?")
+
 announce()
 quit()
+this_is_it()
 quit()
