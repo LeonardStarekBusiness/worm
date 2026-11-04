@@ -4,7 +4,6 @@ func announce ()
   println("This works now!")
 
 func quit ()
-  println("")
   println("The end is near.")
   println("Quitting...")
 

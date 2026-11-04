@@ -1,7 +1,7 @@
 NAME = build/tests
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Wpedantic -Werror -g -std=c++23 -I../include
+CXXFLAGS = -Wall -Wextra -Wpedantic -Werror -g -std=c++23 -I../include -Iinclude
 
 TEST_SRC = $(shell find src -type f -name "*.cpp")
 IMPL_SRC = $(filter-out ../src/worm.cpp,$(shell find ../src -type f -name "*.cpp"))

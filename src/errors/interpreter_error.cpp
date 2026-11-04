@@ -1,11 +1,8 @@
-#include "worm/parse/parse_error.h"
-
-#include <exception>
-#include <string>
+#include "worm/errors/interpreter_error.h"
 
 #include "worm/errors/err_info.h"
 
-namespace worm::parse {
+namespace worm::errors {
 namespace {
 std::string extend_msg(const std::string& msg, std::exception_ptr err_ptr) {
   if (!err_ptr) {
@@ -16,18 +13,18 @@ std::string extend_msg(const std::string& msg, std::exception_ptr err_ptr) {
   try {
     std::rethrow_exception(err_ptr);
   } catch (const std::exception& e) {
-    return msg + e.what();
+    return ret + e.what();
   } catch (...) {
-    return msg + "Unknown exception!";
+    return ret + "Unknown exception!";
   }
 }
 } // namespace
 
-ParseError::ParseError(ErrInfo err_info)
+InterpreterError::InterpreterError(ErrInfo err_info)
     : err_info {err_info}
     , extended_msg {extend_msg(err_info.msg, err_info.og_err)} {}
 
-const char* ParseError::what() const noexcept {
+const char* InterpreterError::what() const noexcept {
   return extended_msg.c_str();
 }
-} // namespace worm::parse
+} // namespace worm::errors

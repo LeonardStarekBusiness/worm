@@ -9,9 +9,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "worm/errors/err_info.h"
+#include "worm/errors/interpreter_error.h"
 #include "worm/functions/function.h"
+#include "worm/functions/function_error.h"
 #include "worm/functions/function_mapping.h"
 #include "worm/parse/parse.h"
+#include "worm/parse/parse_error.h"
 #include "worm/util/string.h"
 #include "worm/wstd.h"
 
@@ -38,7 +42,9 @@ void substitute_execute(
 
   auto func_name_end_it {std::find(sv.begin(), sv.end(), '(')};
   if (func_name_end_it == sv.end()) {
-    throw std::runtime_error("Error executing function call: not a function call!");
+    throw FunctionError {errors::ErrInfo {
+      .msg {std::format("Error executing function: `{}` is not a function call!", sv)}
+    }};
   }
 
   std::string func_name {sv.begin(), func_name_end_it};
@@ -47,20 +53,23 @@ void substitute_execute(
   std::vector<std::string> params;
   try {
     params = parse::parse_params({func_name_end_it, sv.end()});
-  } catch (std::invalid_argument& e) {
-    throw std::invalid_argument(
-      std::format("in `worm::functions::substitute_execute({})`:\n{}", sv, e.what())
-    );
+  } catch (const parse::ParseError& e) {
+    throw parse::ParseError {errors::ErrInfo {
+      .msg {
+        std::format("in `worm::functions::substitute_execute({})`:\n{}", sv, e.what())
+      },
+      .line_offset = e.err_info.line_offset,
+      .og_err {std::make_exception_ptr(e)}
+    }};
   }
 
-  /* Simulates `Function::hash_code()` */
-  func_name += std::to_string(params.size());
-
+  Function::hash_code(func_name, params.size());
   auto func_it {funcs.find(func_name)};
+
   if (func_it == funcs.end()) {
-    throw std::runtime_error(
-      "Error executing function call: undefined function '" + func_name + "'!"
-    );
+    throw FunctionError {errors::ErrInfo {.msg {
+      std::format("Error executing function call: undefined function '{} '!", func_name)
+    }}};
   }
 
   for (auto& param : params) {
@@ -70,9 +79,10 @@ void substitute_execute(
 
     auto it {map.find(param)};
     if (it == map.end()) {
-      throw std::runtime_error(
-        "Error parsing statement: use of undeclared identifier '" + param + "'!"
-      );
+      throw parse::ParseError {errors::ErrInfo {.msg {std::format(
+        "Error parsing statement: use of undeclared identifier '{}'!",
+        param
+      )}}};
     }
 
     param = it->second;
@@ -88,22 +98,24 @@ Function def_func(const std::vector<std::string>& lines) {
 
     auto [it, inserted] = funcs.try_emplace(hash, std::move(f));
     if (!inserted) {
-      throw std::invalid_argument(
-        "Error declaring function with hash '" + hash + "': function already exists!"
-      );
+      throw FunctionError {errors::ErrInfo {.msg {std::format(
+        "Error declaring function with hash '{}': function already exists!",
+        hash
+      )}}};
     }
 
     return it->second;
-  } catch (std::invalid_argument& e) {
-    throw std::invalid_argument(
-      std::string("In `worm::functions::def_func()`:\n") + e.what()
-    );
+  } catch (const errors::InterpreterError& e) {
+    throw errors::InterpreterError {errors::ErrInfo {
+      .msg {"in `worm::functions::def_func()`:"},
+      .og_err {std::make_exception_ptr(e)}
+    }};
   }
 }
 
 /*
- * Currently only parses a single-function-statement and doesn't handle nested function
- * calls or expressions for that matter
+ * Currently only parses a single-function-statement and doesn't handle nested
+ * function calls or expressions for that matter
  *
  * Not handling nested function calls is sensible at this state as functions with
  * return types aren't implemented yet to begin with
@@ -123,13 +135,11 @@ FunctionMapping parse_func_mapping(
   std::vector<std::string> func_params;
   try {
     func_params = parse::parse_params({func_name_end_it, line.end()});
-  } catch (std::invalid_argument& e) {
-    throw std::invalid_argument(
-      std::format("in `worm::functions::parse_func_mapping()`:\n{}", e.what())
-    );
+  } catch (const parse::ParseError& e) {
+    throw parse::ParseError {
+      errors::ErrInfo {.msg {"in `worm::functions::parse_func_mapping()`:"}}
+    };
   }
-
-  func_name += std::to_string(func_params.size());
 
   std::vector<std::pair<std::string, std::size_t>> mapping;
   for (const auto& param : func_params) {
@@ -141,9 +151,10 @@ FunctionMapping parse_func_mapping(
     if (
       is_identifier && std::find(params.begin(), params.end(), param) == params.end()
     ) {
-      throw std::runtime_error(
-        "Error parsing statement: use of undeclared identifier '" + param + "'!"
-      );
+      throw parse::ParseError {errors::ErrInfo {.msg {std::format(
+        "Error parsing statement: use of undeclared identifier '{}'!",
+        param
+      )}}};
     }
 
     if (is_identifier) {
@@ -154,11 +165,13 @@ FunctionMapping parse_func_mapping(
     }
   }
 
+  std::string func_hash {Function::hash_code(func_name, params.size())};
   auto func_it {funcs.find(func_name)};
   if (func_it == funcs.end()) {
-    throw std::runtime_error(
-      "Error parsing statement: use of undeclared function '" + func_name + "'!"
-    );
+    throw FunctionError {errors::ErrInfo {.msg {std::format(
+      "Error mapping statement: use of undeclared function with hash '{}'!",
+      func_hash
+    )}}};
   }
 
   return {&func_it->second, mapping};

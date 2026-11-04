@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "worm/errors/interpreter_error.h"
 #include "worm/interpreter.h"
 
 std::vector<std::string> argv_to_vec(int argc, const char** argv) {
@@ -22,8 +24,14 @@ int main(int argc, const char** argv) {
   try {
     worm::Interpreter interpreter {argv_to_vec(argc, argv)};
     interpreter.run();
-  } catch (std::exception& e) {
-    std::cout << e.what() << std::endl;
+  } catch (worm::errors::InterpreterError& e) {
+    std::cout << "\x1b[31mIntepreter-error occurred\x1b[0m:\n" << e.what() << std::endl;
+    return 1;
+  } catch (const std::exception& e) {
+    std::cout << "\x1b[34mNon-interpreter-error occurred\x1b[0m:\n"
+              << e.what() << std::endl;
     return 1;
   }
+
+  return 0;
 }

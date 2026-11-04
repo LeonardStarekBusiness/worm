@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "worm/errors/err_info.h"
+#include "worm/errors/interpreter_error.h"
 #include "worm/functions/functions.h"
 #include "worm/parse/construct.h"
 #include "worm/parse/parse.h"
@@ -47,7 +49,7 @@ Interpreter::Interpreter(const std::vector<std::string>& args) : args {args} {
   file = std::ifstream {args[1]};
   if (!file) {
     throw std::runtime_error(
-      "Error initializing interpreter: Couldn't open file '" + args[1] + "'!"
+      std::format("Error initializing interpreter: Couldn't open file '{}'!", args[1])
     );
   }
 }
@@ -87,7 +89,6 @@ void Interpreter::run() {
           std::size_t base_indent_lvl {indent_lvl};
 
           while (nextline_check_indent(file, line, indent_lvl, indent_width)) {
-            ++line_pos;
             if (line.empty()) {
               last_pos = file.tellg();
               continue;
@@ -96,7 +97,6 @@ void Interpreter::run() {
             auto cur_indent {util::string::indent_lvl(line)};
             if (cur_indent <= base_indent_lvl) {
               reread_line = true;
-              --line_pos;
               break;
             }
 
@@ -114,8 +114,11 @@ void Interpreter::run() {
         default: throw std::logic_error("not yet implemented!");
       }
     }
-  } catch (std::exception& e) {
-    throw std::runtime_error("At line " + std::to_string(line_pos) + ":\n" + e.what());
+  } catch (const errors::InterpreterError& e) {
+    throw errors::InterpreterError {errors::ErrInfo {
+      .msg {std::format("at line {}:", line_pos + e.err_info.line_offset)},
+      .og_err {std::make_exception_ptr(e)}
+    }};
   }
 }
 } // namespace worm
