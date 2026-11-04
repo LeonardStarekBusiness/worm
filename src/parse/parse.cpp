@@ -7,8 +7,10 @@
 #include <string_view>
 #include <vector>
 
+#include "worm/errors/err_info.h"
 #include "worm/parse/construct.h"
 #include "worm/parse/keywords.h"
+#include "worm/parse/parse_error.h"
 #include "worm/parse/types.h"
 #include "worm/util/string.h"
 
@@ -104,20 +106,28 @@ std::vector<std::string> parse_identifiers(std::string_view sv) {
   }
 
   if (sv.front() != '(' || sv.back() != ')') {
-    throw std::invalid_argument(
-      std::string {"Error parsing parameters: missing outer parentheses!\n"}
-      + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
-    );
+    throw ParseError {ErrInfo {
+      .msg {
+        std::string {"Error parsing parameters: missing outer parentheses!\n"}
+        + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
+      },
+      .line_offset = 0,
+      .og_err {nullptr}
+    }};
   }
 
   sv = {sv.begin() + 1, sv.end() - 1};
   bool invalid_chars {!std::all_of(sv.begin(), sv.end(), parse::is_signature_char)};
 
   if (invalid_chars) {
-    throw std::invalid_argument(
-      std::string {"Error parsing identifiers: contains invalid chars!\n"}
-      + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
-    );
+    throw ParseError {ErrInfo {
+      .msg {
+        std::string {"Error parsing identifiers: contains invalid chars!\n"}
+        + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
+      },
+      .line_offset = 0,
+      .og_err {nullptr}
+    }};
   }
 
   return util::string::parse_list(sv, identifier_len, parse::is_identifier_char);
@@ -129,10 +139,14 @@ std::vector<std::string> parse_params(std::string_view sv) {
   }
 
   if (sv.front() != '(' || sv.back() != ')') {
-    throw std::invalid_argument(
-      std::string {"Error parsing parameters: missing outer parentheses!\n"}
-      + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
-    );
+    throw ParseError {ErrInfo {
+      .msg {
+        std::string {"Error parsing parameters: missing outer parentheses!\n"}
+        + "Input: \x1b[31m" + std::string {sv} + "\x1b[0m"
+      },
+      .line_offset = 0,
+      .og_err {nullptr}
+    }};
   }
 
   sv = {sv.begin() + 1, sv.end() - 1};
