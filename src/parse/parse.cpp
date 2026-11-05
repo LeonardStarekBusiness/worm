@@ -23,45 +23,47 @@ std::size_t identifier_len(std::string_view sv) {
   return len;
 }
 
-std::size_t param_len(std::string_view sv) {
+std::size_t number_len(std::string_view sv) {
+  std::size_t len {0};
+  while (len < sv.size() && parse::is_numeric_char(sv[len])) {
+    ++len;
+  }
+
+  return len;
+}
+
+std::size_t string_len(std::string_view sv) {
   if (sv.empty()) {
     return 0;
   }
 
-  bool in_str {false};
-  bool escaped {false};
-  bool (*allowed_char)(char);
-
-  if (sv[0] == types::str_delim) {
-    allowed_char = [](char) {
-      return true;
-    };
-
-    in_str = true;
-  } else if (parse::is_identifier_char(sv[0])) {
-    return identifier_len(sv);
-  } else if (parse::is_numeric_char(sv[0])) {
-    allowed_char = parse::is_numeric_char;
-  } else {
-    return 0;
-  }
-
+  bool in_str {sv[0] == parse::types::str_delim};
   std::size_t len {1};
-  while (
-    len < sv.size() && allowed_char(sv[len])
-    && (!in_str || !escaped || sv[len] != parse::types::str_delim)
-  ) {
-    if (in_str) {
-      escaped = !escaped && sv[len] == '\\';
+
+  while (in_str && len < sv.size()) {
+    if (sv[len - 1] != '\\' && sv[len] == parse::types::str_delim) {
+      in_str = false;
     }
 
     ++len;
   }
 
-  if (len < sv.size() && in_str && sv[len] == parse::types::str_delim) {
-    return ++len;
+  return len;
+}
+
+std::size_t param_len(std::string_view sv) {
+  if (sv.empty()) {
+    return 0;
+  }
+
+  if (parse::is_identifier_char(sv[0])) {
+    return identifier_len(sv);
+  } else if (parse::is_numeric_char(sv[0])) {
+    return number_len(sv);
+  } else if (sv[0] == parse::types::str_delim) {
+    return string_len(sv);
   } else {
-    return len;
+    return 0;
   }
 }
 

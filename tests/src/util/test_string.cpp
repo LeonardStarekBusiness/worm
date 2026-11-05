@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <string>
 
 #include "worm/util/string.h"
 
@@ -46,6 +47,16 @@ void test_haystack_has_many_strings() {
 }
 } // namespace contains_keyword_tests
 
+namespace unescape_str_delims_tests {
+void test() {
+  std::string expected {"Hello, \" World"};
+  std::string actual {"Hello, \\\" World"};
+  unescape_str_delims(actual);
+
+  assert(actual == expected);
+}
+}
+
 void test_util_string() {
   contains_keyword_tests::test_empty_haystack();
   contains_keyword_tests::test_slightly_small_keyword();
@@ -56,6 +67,8 @@ void test_util_string() {
   contains_keyword_tests::test_keyword_has_adjacent_char_at_head();
   contains_keyword_tests::test_keyword_has_adjacent_char_surrounding();
   contains_keyword_tests::test_keyword_is_in_string();
+
+  unescape_str_delims_tests::test();
 
   std::cout << "\x1b[32mAll tests for `worm::util::string` passed!\x1b[0m\n";
 }

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <format>
+#include <iostream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -73,6 +74,7 @@ void substitute_execute(
 
   for (auto& param : params) {
     if (!std::all_of(param.begin(), param.end(), parse::is_identifier_char)) {
+      util::string::unescape_str_delims(param);
       continue;
     }
 

@@ -4,12 +4,14 @@
 #include <cctype>
 #include <cstddef>
 #include <format>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include "worm/parse/parse.h"
+#include "worm/parse/types.h"
 
 namespace worm::util::string {
 bool isspace(char ch) {
@@ -163,5 +165,16 @@ std::size_t indent_lvl(const std::string& s) {
   }
 
   return s.size();
+}
+
+void unescape_str_delims(std::string& s) {
+  std::size_t idx {1};
+  while (idx < s.size()) {
+    if (s[idx - 1] == '\\' && s[idx] == parse::types::str_delim) {
+      s.erase(idx - 1, 1);
+    } else {
+      ++idx;
+    }
+  }
 }
 } // namespace worm::util::string

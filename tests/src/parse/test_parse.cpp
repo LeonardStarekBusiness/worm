@@ -1,13 +1,12 @@
 #include <cassert>
-#include <cstddef>
-#include <cstdlib>
-#include <format>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "worm/parse/parse.h"
 #include "worm/parse/parse_error.h"
+#include "worm_tests/util/util.h"
 
 namespace worm::parse {
 namespace parse_identifiers_tests {
@@ -37,20 +36,10 @@ void test_non_alphanumeric_space_input() {
 }
 
 void test_normal_input() {
-  std::vector expected {"hello", "world", "test"};
+  std::vector<std::string> expected {"hello", "world", "test"};
   std::vector actual {parse::parse_identifiers("(hello, world, test)")};
 
-  assert(actual.size() == expected.size());
-  for (std::size_t i {0}; i < actual.size(); ++i) {
-    if (actual[i] != expected[i]) {
-      std::cout << std::format(
-        "\x1b[31mMismatch!\x1b[0m\tactual: '{}', expected: '{}'\n",
-        actual[i],
-        expected[i]
-      );
-      std::abort();
-    }
-  }
+  worm_tests::util::cmp_vecs(actual, expected);
 }
 
 void test_normal_input_with_start_paren() {

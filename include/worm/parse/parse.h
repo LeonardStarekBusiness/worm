@@ -55,14 +55,6 @@ std::vector<std::string> parse_identifiers(std::string_view);
  */
 std::vector<std::string> parse_params(std::string_view);
 /*
- * Counts the amount of chars from the beginning of the string view that belong to an
- * identifier that starts from the start of the string view
- *
- * Example: 
- * xyz, this_is_the_next_identifier -> identifier_len() would be 3
- */
-std::size_t identifier_len(std::string_view);
-/*
  * Counts the amount of chars from the beginning of the string view that belong to a
  * parameter that starts from the start of the string view
  *
@@ -72,5 +64,30 @@ std::size_t identifier_len(std::string_view);
  * "str", 45, this_is_the_next_identifier" -> param_len() would be 5
  */
 std::size_t param_len(std::string_view);
+/*
+ * Counts the amount of chars from the beginning of the string view that belong to the
+ * next identifier
+ *
+ * Example: 
+ * xyz, this_is_the_next_identifier -> `identifier_len()` would be 3
+ */
+std::size_t identifier_len(std::string_view);
+/*
+ * Counts the amount of chars from the beginning of the string view that belong to the
+ * next numeric argument
+ *
+ * Example: 
+ * 5454.0545, this_is_the_next_identifier -> `number_len()` would be 9
+ */
+std::size_t number_len(std::string_view);
+/*
+ * Counts the amount of chars from the beginning of the string view that belong to a
+ * string parameter 
+ * !INCLUDING! the wrapping string delimiters `worm::parse::types::str_delim`
+ *
+ * Example: 
+ * "xyz", this_is_the_next_identifier -> `string_len()` would be 5
+ */
+std::size_t string_len(std::string_view);
 } // namespace worm::parse
 #endif // WORM_PARSE_PARSE_H
