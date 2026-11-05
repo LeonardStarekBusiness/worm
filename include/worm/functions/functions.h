@@ -1,7 +1,6 @@
 #ifndef WORM_FUNCTIONS_H
 #define WORM_FUNCTIONS_H
 
-#include <cstddef>
 #include <string>
 #include <string_view>
 #include <unordered_map>

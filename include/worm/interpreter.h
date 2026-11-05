@@ -37,6 +37,7 @@ private:
    * Input file (.worm)
    */
   std::ifstream file;
+  std::string file_name;
 };
 } // namespace worm
 

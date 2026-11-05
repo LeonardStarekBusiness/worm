@@ -11,6 +11,7 @@ struct InterpreterError : public std::exception {
   InterpreterError(ErrInfo);
 
   const char* what() const noexcept override;
+  InterpreterError shortened() const;
 
   ErrInfo err_info;
 
