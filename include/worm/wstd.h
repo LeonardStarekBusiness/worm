@@ -16,8 +16,9 @@
  * --converts it into--> std::cout << x
  */
 namespace worm::wstd {
-void print(const std::vector<std::string>&);
-void println(const std::vector<std::string>&);
+void print_n(const std::vector<std::string>&);
+void println_n(const std::vector<std::string>&);
+void sleep_1(const std::vector<std::string>&);
 } // namespace worm::wstd
 
 #endif // WORM_WSTD_H

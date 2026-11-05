@@ -27,8 +27,8 @@ Function noop_func {"__noop", 0, &noop};
 
 std::unordered_map<std::string, Function> funcs {
   {noop_func.hash_code(), noop_func},
-  {"print1", Function {"print", 1, &wstd::print}},
-  {"println1", Function {"println", 1, &wstd::println}}
+  {"print1", Function {"print", 1, &wstd::print_n}},
+  {"println1", Function {"println", 1, &wstd::println_n}}
 };
 
 void substitute_execute(

@@ -1,3 +1,5 @@
+# Worm v0.2.0
+
 ## Compilation
 
 ```bash
@@ -11,5 +13,5 @@ to the program or declare a standard indentation width
 
 ## Execution
 ```bash
-    ./worm <program.worm>
+    ./worm <program.worm> {<flag>}
 ```
