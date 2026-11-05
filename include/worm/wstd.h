@@ -18,7 +18,7 @@
 namespace worm::wstd {
 void print_n(const std::vector<std::string>&);
 void println_n(const std::vector<std::string>&);
-void sleep_1(const std::vector<std::string>&);
+void sleep_ms_1(const std::vector<std::string>&);
 } // namespace worm::wstd
 
 #endif // WORM_WSTD_H

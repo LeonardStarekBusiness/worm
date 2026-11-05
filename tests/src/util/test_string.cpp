@@ -55,7 +55,7 @@ void test() {
 
   assert(actual == expected);
 }
-}
+} // namespace unescape_str_delims_tests
 
 void test_util_string() {
   contains_keyword_tests::test_empty_haystack();

@@ -83,8 +83,16 @@ std::pair<std::string, std::vector<std::string>> validate_then_return_params(
 }
 } // namespace
 
-std::string Function::hash_code(const std::string& func_name, std::size_t param_count) {
-  return func_name + std::to_string(param_count);
+std::string Function::hash_code(
+  const std::string& func_name,
+  std::size_t param_count,
+  bool variadic
+) {
+  return std::format(
+    "{}${}",
+    func_name,
+    variadic ? "variadic" : "arity=" + std::to_string(param_count)
+  );
 }
 
 Function::Function(const std::vector<std::string>& lines) {
@@ -103,8 +111,11 @@ Function::Function(const std::vector<std::string>& lines) {
   );
 
   auto [func_name, params] {validate_then_return_params(trimmed[0])};
-  std::size_t line_offset {1};
+  if (params.size() == 1 && params[0] == parse::keywords::vararg) {
+    variadic = true;
+  }
 
+  std::size_t line_offset {1};
   for (std::size_t i {1}; i < trimmed.size(); ++i, ++line_offset) {
     try {
       auto [func, mapping] {parse_func_mapping(lines[i], params)};
@@ -127,11 +138,13 @@ Function::Function(const std::vector<std::string>& lines) {
 Function::Function(
   const std::string& name,
   std::size_t param_count,
-  void (*base_func)(const std::vector<std::string>&)
+  void (*base_func)(const std::vector<std::string>&),
+  bool variadic
 )
     : name {name}
     , param_count {param_count}
-    , base_func {base_func} {
+    , base_func {base_func}
+    , variadic {variadic} {
   assert(sub_funcs.empty() && param_mapping.empty());
 }
 
@@ -140,7 +153,7 @@ void Function::operator()(const std::vector<std::string>& params) const {
     throw FunctionError {errors::ErrInfo {
       .msg {std::format(
         "Error executing function `{}`: requires {} parameters, "
-        "but only {} were provided!",
+        "but {} were provided!",
         name,
         std::to_string(param_count),
         std::to_string(params.size())
@@ -165,7 +178,7 @@ void Function::operator()(const std::vector<std::string>& params) const {
 }
 
 std::string Function::hash_code() const {
-  return Function::hash_code(name, param_count);
+  return Function::hash_code(name, param_count, variadic);
 }
 
 bool Function::operator==(const Function& other) const {

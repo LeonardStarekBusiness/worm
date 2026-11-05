@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <format>
-#include <iostream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -21,15 +20,16 @@
 
 namespace worm::functions {
 namespace {
-void noop(const std::vector<std::string>&) {}
+Function noop_func {"noop", 0, [](const auto&) {}};
+Function print_n {"print", 1, &wstd::print_n, true};
+Function println_n {"println", 1, &wstd::println_n, true};
+Function sleep_ms_1 {"sleep_ms", 1, &wstd::sleep_ms_1};
 } // namespace
 
-Function noop_func {"__noop", 0, &noop};
-
 std::unordered_map<std::string, Function> funcs {
-  {noop_func.hash_code(), noop_func},
-  {"print1", Function {"print", 1, &wstd::print_n}},
-  {"println1", Function {"println", 1, &wstd::println_n}}
+  {print_n.hash_code(), print_n},
+  {println_n.hash_code(), println_n},
+  {sleep_ms_1.hash_code(), sleep_ms_1},
 };
 
 void substitute_execute(
@@ -67,9 +67,16 @@ void substitute_execute(
   auto func_it {funcs.find(func_hash)};
 
   if (func_it == funcs.end()) {
-    throw FunctionError {errors::ErrInfo {.msg {
-      std::format("Error executing function call: undefined function '{}'!", func_name)
-    }}};
+    std::string alt_hash {Function::hash_code(func_name, 0, true)};
+    func_it = funcs.find(alt_hash);
+
+    if (func_it == funcs.end()) {
+      throw FunctionError {errors::ErrInfo {.msg {std::format(
+        "Error executing function call: undefined reference to "
+        "\x1b[3;1m{}\x1b[0m!",
+        func_hash
+      )}}};
+    }
   }
 
   for (auto& param : params) {
