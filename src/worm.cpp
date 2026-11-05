@@ -28,7 +28,7 @@ int main(int argc, const char** argv) {
     std::cout << "\x1b[31mIntepreter-error occurred\x1b[0m:\n" << e.what() << std::endl;
     return 1;
   } catch (const std::exception& e) {
-    std::cout << "\x1b[34mNon-interpreter-error occurred\x1b[0m:\n"
+    std::cout << "\x1b[41mNon-interpreter-error occurred\x1b[0m:\n"
               << e.what() << std::endl;
     return 1;
   }

@@ -63,8 +63,8 @@ Interpreter::Interpreter(const std::vector<std::string>& args) : args {args} {
 void Interpreter::run() {
   const std::size_t indent_width {2};
   std::size_t indent_lvl {0};
-  [[maybe_unused]]
   std::size_t line_pos {0};
+  std::size_t line_offset {0};
   std::string line;
   bool reread_line {false};
   std::ifstream::pos_type last_pos {};
@@ -76,9 +76,14 @@ void Interpreter::run() {
         file.seekg(last_pos);
         nextline_check_indent(file, line, indent_lvl, indent_width);
         reread_line = false;
+      } else {
+        last_pos = file.tellg();
       }
 
       ++line_pos;
+      line_pos += line_offset;
+      line_offset = 0;
+
       if (line.empty()) {
         continue;
       }
@@ -89,17 +94,13 @@ void Interpreter::run() {
           std::size_t base_indent_lvl {indent_lvl};
 
           while (nextline_check_indent(file, line, indent_lvl, indent_width)) {
-            if (line.empty()) {
-              last_pos = file.tellg();
-              continue;
-            }
-
             auto cur_indent {util::string::indent_lvl(line)};
             if (cur_indent <= base_indent_lvl) {
               reread_line = true;
               break;
             }
 
+            ++line_offset;
             func_def_lines.push_back(line);
             last_pos = file.tellg();
           }
@@ -111,7 +112,7 @@ void Interpreter::run() {
           functions::substitute_execute(line, vars);
           break;
         }
-        default: throw std::logic_error("not yet implemented!");
+        default: throw std::logic_error("Not yet implemented!");
       }
     }
   } catch (const errors::InterpreterError& e) {
