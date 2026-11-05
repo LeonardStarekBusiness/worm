@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <format>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -63,12 +62,12 @@ void substitute_execute(
     }};
   }
 
-  Function::hash_code(func_name, params.size());
-  auto func_it {funcs.find(func_name)};
+  std::string func_hash {Function::hash_code(func_name, params.size())};
+  auto func_it {funcs.find(func_hash)};
 
   if (func_it == funcs.end()) {
     throw FunctionError {errors::ErrInfo {.msg {
-      std::format("Error executing function call: undefined function '{} '!", func_name)
+      std::format("Error executing function call: undefined function '{}'!", func_name)
     }}};
   }
 
@@ -108,6 +107,7 @@ Function def_func(const std::vector<std::string>& lines) {
   } catch (const errors::InterpreterError& e) {
     throw errors::InterpreterError {errors::ErrInfo {
       .msg {"in `worm::functions::def_func()`:"},
+      .line_offset = e.err_info.line_offset,
       .og_err {std::make_exception_ptr(e)}
     }};
   }
@@ -165,8 +165,9 @@ FunctionMapping parse_func_mapping(
     }
   }
 
-  std::string func_hash {Function::hash_code(func_name, params.size())};
-  auto func_it {funcs.find(func_name)};
+  std::string func_hash {Function::hash_code(func_name, func_params.size())};
+  auto func_it {funcs.find(func_hash)};
+
   if (func_it == funcs.end()) {
     throw FunctionError {errors::ErrInfo {.msg {std::format(
       "Error mapping statement: use of undeclared function with hash '{}'!",

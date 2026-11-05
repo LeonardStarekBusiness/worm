@@ -7,7 +7,6 @@ func quit ()
   println("The end is near.")
   println("Quitting...")
 
-
   println("Or are we really?\n")
 
 func this_is_it()

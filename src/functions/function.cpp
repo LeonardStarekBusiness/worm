@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <exception>
 #include <format>
+#include <iostream>
 #include <iterator>
 #include <string>
 #include <string_view>
@@ -110,10 +111,12 @@ Function::Function(const std::vector<std::string>& lines) {
       auto [func, mapping] {parse_func_mapping(lines[i], params)};
       sub_funcs.push_back(func);
       param_mapping.push_back(mapping);
-    } catch (const parse::ParseError& e) {
-      throw parse::ParseError {
-        errors::ErrInfo {.msg {"in `Function` ctor: "}, .line_offset = line_offset}
-      };
+    } catch (const FunctionError& e) {
+      throw FunctionError {errors::ErrInfo {
+        .msg {"in `Function` ctor: "},
+        .line_offset = line_offset,
+        .og_err {std::make_exception_ptr(e)}
+      }};
     }
 
     assert(sub_funcs.size() == param_mapping.size() && !base_func);
