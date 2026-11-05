@@ -1,11 +1,18 @@
 func announce ()
-	print("Hey!")
-	print("This is a test!")
+  println("Hey!")
+  println("This is a test!")
+  println("This works now!")
 
 func quit ()
-	print("The end is near.")
-	print("Quitting...")
+  println("The end is near.")
+  println("Quitting...")
+
+  println("Or are we really?\n")
+
+func this_is_it()
+  println("I mean, this is it, no?")
 
 announce()
 quit()
+this_is_it()
 quit()
