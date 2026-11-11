@@ -1,0 +1,34 @@
+func print_some_stuff()
+  println("One")
+  println("Two")
+  println("Three")
+
+func print_line()
+  println("------------")
+
+func print_three_line()
+  print_line()
+  print_line()
+  print_line()
+
+func print_nine_line()
+  print_three_line()
+  print_three_line()
+  print_three_line()
+
+print_line()
+println("Now nine lines")
+print_nine_line()
+
+func sabotage() 
+  print("this ")
+  print("is ")
+  print("going ")
+  print("to ")
+  print("fail ")
+  print("at ")
+  print("line ")
+  print("32 ")
+  __FAIL_AT_LINE_32__("Yurr")
+
+print("You're not supposed to see this...")

@@ -1,0 +1,4 @@
+func test_many_spaces(x)
+  print(x       ,        x)
+
+test_many_spaces

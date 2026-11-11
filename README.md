@@ -1,15 +1,18 @@
+# Worm v0.2.0
+
 ## Compilation
 
 ```bash
     make
 ```
-## Note
-Currently only preprocessing is supported, not execution.
-Using the --prep flag outputs the generated instructions into a file called program.tmp.
 
-Goal: Execution will instead execute the generated code.
+# Note
+Currently, only (void) function declarations and simple (void) function calls are possible
+
+Indentation checking is not mature yet: need to either enable passing the indentation width
+to the program or declare a standard indentation width
 
 ## Execution
 ```bash
-    ./worm <program.worm> --prep
+    ./worm <program.worm> {<flag>}
 ```
