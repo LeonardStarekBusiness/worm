@@ -69,7 +69,7 @@ std::size_t param_len(std::string_view);
  * next identifier
  *
  * Example: 
- * xyz, this_is_the_next_identifier -> `identifier_len()` would be 3
+ * xyz, next_param -> `identifier_len()` would be 3
  */
 std::size_t identifier_len(std::string_view);
 /*
@@ -77,7 +77,7 @@ std::size_t identifier_len(std::string_view);
  * next numeric argument
  *
  * Example: 
- * 5454.0545, this_is_the_next_identifier -> `number_len()` would be 9
+ * 5454.0545, next_param -> `number_len()` would be 9
  */
 std::size_t number_len(std::string_view);
 /*
@@ -86,8 +86,16 @@ std::size_t number_len(std::string_view);
  * !INCLUDING! the wrapping string delimiters `worm::parse::types::str_delim`
  *
  * Example: 
- * "xyz", this_is_the_next_identifier -> `string_len()` would be 5
+ * "xyz", next_param -> `string_len()` would be 5
  */
 std::size_t string_len(std::string_view);
+/*
+ * Counts the amount of chars from the beginning of the string view that belong to an
+ * indexed vararg parameter
+ *
+ * Example: 
+ * vararg[5], next_param -> `vararg_len()` would be 9
+ */
+std::size_t vararg_len(std::string_view);
 } // namespace worm::parse
 #endif // WORM_PARSE_PARSE_H

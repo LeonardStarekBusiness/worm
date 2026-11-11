@@ -150,4 +150,43 @@ std::vector<std::string> parse_params(std::string_view sv) {
       || ch == parse::str_delim;
   });
 }
+
+std::size_t vararg_len(std::string_view sv) {
+  if (!sv.starts_with(parse::keywords::vararg)) {
+    return 0;
+  }
+
+  std::size_t len {parse::keywords::vararg.size()};
+  if (sv[len++] != '[') {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing '['!"}}
+    };
+  }
+
+  std::string_view idx_sv {sv.begin() + len, sv.end()};
+  std::size_t idx_len {number_len(idx_sv)};
+
+  if (!idx_len) {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing index!"}}
+    };
+  }
+
+  if (std::any_of(idx_sv.begin(), idx_sv.begin() + idx_len, [](auto ch) {
+        return ch == '.';
+      })) {
+    throw ParseError {errors::ErrInfo {
+      .msg {"Error parsing vararg-indexing parameter: Index must be an integer!"}
+    }};
+  }
+
+  len += idx_len;
+  if (sv[len++] != ']')  {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing '['!"}}
+    };
+  }
+
+  return len++;
+}
 } // namespace worm::parse
