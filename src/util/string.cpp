@@ -16,9 +16,9 @@ bool isspace(char ch) {
   return std::isspace(uch);
 }
 
-void trim(std::string& s) {
+void trim(std::string& s, bool (*should_strip)(char)) {
   std::size_t start {0};
-  while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) {
+  while (start < s.size() && should_strip(s[start])) {
     ++start;
   }
 
@@ -28,7 +28,7 @@ void trim(std::string& s) {
   }
 
   std::size_t end_incl {s.size()};
-  while (end_incl-- > 0 && std::isspace(static_cast<unsigned char>(s[end_incl]))) {
+  while (end_incl-- > 0 && should_strip(s[end_incl])) {
     s.pop_back();
   }
 
@@ -45,6 +45,14 @@ std::string_view trimmed_view(const std::string& s) {
   })};
 
   return std::string_view {start, end_incl.base()};
+}
+
+std::string_view strip_circumfix(const std::string& s, char target) {
+  if (s.empty() || s.front() != target || s.back() != target) {
+    return s;
+  }
+
+  return {s.begin() + 1, s.end() - 1};
 }
 
 std::string_view trimmed_view(std::string_view sv) {

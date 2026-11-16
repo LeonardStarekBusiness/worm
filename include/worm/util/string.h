@@ -10,12 +10,18 @@ bool isspace(char ch);
 /*
  * Removes leading or trailing whitespaces
  */
-void trim(std::string&);
+void trim(std::string&, bool (*should_strip)(char) = isspace);
 /*
  * Provides a view into the input string, but without the leading or
  * trailing whitespaces
  */
 std::string_view trimmed_view(const std::string&);
+/*
+ * Provides a view without one layer of wrapping @param target
+ * If the provided string is not wrapped at the front AND back with @param target, 
+ * this function returns a view of the unchanged input string 
+ */
+std::string_view strip_circumfix(const std::string&, char target);
 /*
  * Parses a comma-separated list according to @param token_length and
  * @param is_token_char

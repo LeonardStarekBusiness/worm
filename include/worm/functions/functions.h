@@ -41,7 +41,7 @@ void substitute_execute(
 /*
  * Interprets a function declaration in Worm and translates it to C++
  *
- * @throw: throws std::runtime_error if any interpretation error occurs
+ * @throw: throws if any interpretation error occurs
  * or if the function already exists with the same signature
  *
  * @return: returns the `Function` that gets declared by this function

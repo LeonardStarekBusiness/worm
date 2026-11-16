@@ -2,18 +2,18 @@
 
 #include <iostream>
 
+#include "worm/util/string.h"
+
 namespace worm::wstd {
 void print(const std::vector<std::string>& params) {
   for (const auto& str : params) {
-    std::cout << str;
+    std::cout << util::string::strip_circumfix(str, '"');
   }
 }
 
 void println(const std::vector<std::string>& params) {
   for (const auto& str : params) {
-    std::cout << str;
+    std::cout << util::string::strip_circumfix(str, '"') << '\n';
   }
-
-  std::cout << '\n';
 }
 } // namespace worm::wstd
