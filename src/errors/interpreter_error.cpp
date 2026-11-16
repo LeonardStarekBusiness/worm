@@ -1,5 +1,8 @@
 #include "worm/errors/interpreter_error.h"
 
+#include <algorithm>
+#include <string>
+
 #include "worm/errors/err_info.h"
 
 namespace worm::errors {
@@ -18,6 +21,11 @@ std::string extend_msg(const std::string& msg, std::exception_ptr err_ptr) {
     return ret + "Unknown exception!";
   }
 }
+
+std::string shorten_msg(const std::string& msg) {
+  auto it {std::find(msg.rbegin(), msg.rend(), '\n')};
+  return std::string(it.base(), msg.end());
+}
 } // namespace
 
 InterpreterError::InterpreterError(ErrInfo err_info)
@@ -26,5 +34,12 @@ InterpreterError::InterpreterError(ErrInfo err_info)
 
 const char* InterpreterError::what() const noexcept {
   return extended_msg.c_str();
+}
+
+InterpreterError InterpreterError::shortened() const {
+  return InterpreterError {ErrInfo {
+    .msg {shorten_msg(extended_msg)},
+    .line_offset = err_info.line_offset,
+  }};
 }
 } // namespace worm::errors

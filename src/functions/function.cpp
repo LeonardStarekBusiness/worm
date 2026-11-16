@@ -112,7 +112,7 @@ Function::Function(const std::vector<std::string>& lines) {
       param_mapping.push_back(mapping);
     } catch (const FunctionError& e) {
       throw FunctionError {errors::ErrInfo {
-        .msg {std::format("in `Function` ctor defining {}: ", func_name)},
+        .msg {std::format("in `Function` ctor defining '{}': ", func_name)},
         .line_offset = line_offset,
         .og_err {std::make_exception_ptr(e)}
       }};

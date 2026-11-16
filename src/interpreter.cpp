@@ -52,6 +52,8 @@ Interpreter::Interpreter(const std::vector<std::string>& args) : args {args} {
       std::format("Error initializing interpreter: Couldn't open file '{}'!", args[1])
     );
   }
+
+  file_name = std::string {args[1]};
 }
 
 /*
@@ -116,9 +118,14 @@ void Interpreter::run() {
       }
     }
   } catch (const errors::InterpreterError& e) {
+    bool debug_mode {std::find(args.begin(), args.end(), "--debug") != args.end()};
     throw errors::InterpreterError {errors::ErrInfo {
-      .msg {std::format("at line {}:", line_pos + e.err_info.line_offset)},
-      .og_err {std::make_exception_ptr(e)}
+      .msg {std::format(
+        "in \x1b[4m{}\x1b[0m at line \x1b[1m{}\x1b[0m:",
+        file_name,
+        line_pos + e.err_info.line_offset
+      )},
+      .og_err {std::make_exception_ptr(debug_mode ? e : e.shortened())}
     }};
   }
 }

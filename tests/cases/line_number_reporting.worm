@@ -29,6 +29,6 @@ func sabotage()
   print("at ")
   print("line ")
   print("32 ")
-  __FAIL_AT_LINE_32("Yurr")
+  __FAIL_AT_LINE_32__("Yurr")
 
 print("You're not supposed to see this...")
