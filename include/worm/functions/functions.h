@@ -39,9 +39,9 @@ void substitute_execute(
  *
  * @return: returns the `Function` that gets declared by this function
  */
-Function def_func(const std::vector<std::string>&);
+const Function& def_func(const std::vector<std::string>&);
 /*
- * Creates a `FunctionMapping` out of a .worm input line and a parameter list
+ * Creates a `FunctionMapping` of a .worm input line and a parameter list
  *
  * Example:
  * .worm: "print(a, x, z)
@@ -52,6 +52,7 @@ Function def_func(const std::vector<std::string>&);
  * been trimmed before being passed
  *
  * @param: takes a string input line (.worm) and a string parameter list
+ * can also accept a boolean that sets the possibility of mapping variadic variables
  *
  * @throw: throws if no function is declared that matches the signature of the
  * parsed function
@@ -62,7 +63,11 @@ Function def_func(const std::vector<std::string>&);
  * Edge cases:
  * If an empty string view is passed, returns the mapping of `noop_func`
  */
-FunctionMapping parse_func_mapping(std::string_view, const std::vector<std::string>&);
+[[nodiscard]] FunctionMapping parse_func_mapping(
+  std::string_view,
+  const std::vector<std::string>&,
+  bool variadic = false
+);
 } // namespace worm::functions
 
 #endif // WORM_FUNCTIONS_H

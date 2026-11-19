@@ -15,6 +15,7 @@
 #include "worm/functions/function_mapping.h"
 #include "worm/parse/parse.h"
 #include "worm/parse/parse_error.h"
+#include "worm/parse/types.h"
 #include "worm/util/string.h"
 #include "worm/wstd.h"
 
@@ -32,6 +33,8 @@ std::unordered_map<std::string, Function> funcs {
   {sleep_ms_1.hash_code(), sleep_ms_1},
 };
 
+// TODO: Possibly rename this so that the intent is clearer
+// (should be used for standalone statements, not for functions or such)
 void substitute_execute(
   std::string_view sv,
   std::unordered_map<std::string, std::string>& map
@@ -55,9 +58,7 @@ void substitute_execute(
     params = parse::parse_params({func_name_end_it, sv.end()});
   } catch (const parse::ParseError& e) {
     throw parse::ParseError {errors::ErrInfo {
-      .msg {
-        std::format("in `worm::functions::substitute_execute({})`:\n{}", sv, e.what())
-      },
+      .msg {"in `worm::functions::substitute_execute()`:"},
       .line_offset = e.err_info.line_offset,
       .og_err {std::make_exception_ptr(e)}
     }};
@@ -67,6 +68,7 @@ void substitute_execute(
   auto func_it {funcs.find(func_hash)};
 
   if (func_it == funcs.end()) {
+    // In case the function is variadic
     std::string alt_hash {Function::hash_code(func_name, 0, true)};
     func_it = funcs.find(alt_hash);
 
@@ -80,14 +82,17 @@ void substitute_execute(
   }
 
   for (auto& param : params) {
-    if (!std::all_of(param.begin(), param.end(), parse::is_identifier_char)) {
+    if (param[0] == parse::types::str_delim) {
       util::string::unescape_str_delims(param);
+      continue;
+    } else if (parse::identifier_len(param) != param.size()) {
       continue;
     }
 
     auto it {map.find(param)};
     if (it == map.end()) {
       throw parse::ParseError {errors::ErrInfo {.msg {std::format(
+        "In `worm::functions::substitute_execute()`:\n"
         "Error parsing statement: use of undeclared identifier '{}'!",
         param
       )}}};
@@ -99,7 +104,7 @@ void substitute_execute(
   (func_it->second)(params);
 }
 
-Function def_func(const std::vector<std::string>& lines) {
+const Function& def_func(const std::vector<std::string>& lines) {
   try {
     Function f {lines};
     auto hash {f.hash_code()};
@@ -131,7 +136,8 @@ Function def_func(const std::vector<std::string>& lines) {
  */
 FunctionMapping parse_func_mapping(
   std::string_view line,
-  const std::vector<std::string>& params
+  const std::vector<std::string>& params,
+  bool variadic
 ) {
   if (line.empty()) {
     return FunctionMapping {.f = &noop_func, .mapping = {}};
@@ -143,7 +149,7 @@ FunctionMapping parse_func_mapping(
 
   std::vector<std::string> func_params;
   try {
-    func_params = parse::parse_params({func_name_end_it, line.end()});
+    func_params = parse::parse_params({func_name_end_it, line.end()}, variadic);
   } catch (const parse::ParseError& e) {
     throw parse::ParseError {
       errors::ErrInfo {.msg {"in `worm::functions::parse_func_mapping()`:"}}
@@ -152,15 +158,22 @@ FunctionMapping parse_func_mapping(
 
   std::vector<std::pair<std::string, std::size_t>> mapping;
   for (const auto& param : func_params) {
+    if (variadic) {
+      auto [len, vararg_idx] {parse::vararg_len(param)};
+      if (len) {
+        mapping.emplace_back("", vararg_idx);
+        continue;
+      }
+    }
+
     auto it {std::find(params.begin(), params.end(), param)};
     bool is_identifier {
       std::all_of(param.begin(), param.end(), parse::is_identifier_char)
     };
 
-    if (
-      is_identifier && std::find(params.begin(), params.end(), param) == params.end()
-    ) {
+    if (is_identifier && it == params.end()) {
       throw parse::ParseError {errors::ErrInfo {.msg {std::format(
+        "In `worm::functions::parse_func_mapping()`:\n"
         "Error parsing statement: use of undeclared identifier '{}'!",
         param
       )}}};
@@ -178,10 +191,15 @@ FunctionMapping parse_func_mapping(
   auto func_it {funcs.find(func_hash)};
 
   if (func_it == funcs.end()) {
-    throw FunctionError {errors::ErrInfo {.msg {std::format(
-      "Error mapping statement: use of undeclared function with hash '{}'!",
-      func_hash
-    )}}};
+    std::string alt_hash {Function::hash_code(func_name, 0, true)};
+    func_it = funcs.find(alt_hash);
+
+    if (func_it == funcs.end()) {
+      throw FunctionError {errors::ErrInfo {.msg {std::format(
+        "Error mapping statement: use of undeclared function with hash '{}'!",
+        func_hash
+      )}}};
+    }
   }
 
   return {&func_it->second, mapping};

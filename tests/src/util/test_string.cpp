@@ -69,7 +69,5 @@ void test_util_string() {
   contains_keyword_tests::test_keyword_is_in_string();
 
   unescape_str_delims_tests::test();
-
-  std::cout << "\x1b[32mAll tests for `worm::util::string` passed!\x1b[0m\n";
 }
 } // namespace worm::util::string

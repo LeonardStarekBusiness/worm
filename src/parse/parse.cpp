@@ -53,13 +53,14 @@ std::size_t string_len(std::string_view sv) {
   return len;
 }
 
-std::size_t param_len(std::string_view sv) {
+std::size_t param_len(std::string_view sv, bool variadic) {
   if (sv.empty()) {
     return 0;
   }
 
   if (parse::is_identifier_char(sv[0])) {
-    return identifier_len(sv);
+    return variadic ? std::max(vararg_len(sv).first, identifier_len(sv))
+                    : identifier_len(sv);
   } else if (parse::is_numeric_char(sv[0])) {
     return number_len(sv);
   } else if (sv[0] == parse::types::str_delim) {
@@ -132,7 +133,7 @@ std::vector<std::string> parse_identifiers(std::string_view sv) {
   return util::string::parse_list(sv, identifier_len, parse::is_identifier_char);
 }
 
-std::vector<std::string> parse_params(std::string_view sv) {
+std::vector<std::string> parse_params(std::string_view sv, bool variadic) {
   if (sv.empty()) {
     return {};
   }
@@ -147,10 +148,16 @@ std::vector<std::string> parse_params(std::string_view sv) {
   }
 
   sv = {sv.begin() + 1, sv.end() - 1};
-  return util::string::parse_list(sv, param_len, [](auto ch) {
-    return parse::is_identifier_char(ch) || parse::is_numeric_char(ch)
-      || ch == parse::str_delim;
-  });
+  return util::string::parse_list(
+    sv,
+    [variadic](std::string_view sv) {
+      return param_len(sv, variadic);
+    },
+    [](auto ch) {
+      return parse::is_identifier_char(ch) || parse::is_numeric_char(ch)
+        || ch == types::str_delim;
+    }
+  );
 }
 
 std::pair<std::size_t, std::size_t> vararg_len(std::string_view sv) {

@@ -92,6 +92,12 @@ void test_normal_input() {
   assert(actual == expected);
 }
 
+void test_longer_idx() {
+  std::pair expected {keywords::vararg.size() + 2 + 3, 128};
+  auto actual {vararg_len("vararg[128], next_param")};
+  assert(actual == expected);
+}
+
 void test_float_idx_fails() {
   try {
     vararg_len("vararg[5.1], next_param");
@@ -134,10 +140,9 @@ void test_parse() {
   parse_identifiers_tests::test_input_with_redundant_comma();
 
   vararg_len_tests::test_normal_input();
+  vararg_len_tests::test_longer_idx();
   vararg_len_tests::test_float_idx_fails();
   vararg_len_tests::test_missing_left_bracket();
   vararg_len_tests::test_missing_right_bracket();
-
-  std::cout << "\x1b[32mAll tests for `worm::parse` passed!\x1b[0m\n";
 }
 } // namespace worm::parse

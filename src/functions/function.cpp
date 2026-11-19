@@ -107,7 +107,7 @@ Function::Function(const std::vector<std::string>& lines) {
     lines.begin(),
     lines.end(),
     std::back_inserter(trimmed),
-    util::string::trimmed_view
+    static_cast<std::string_view(*)(const std::string&)>(util::string::trimmed_view)
   );
 
   auto [func_name, params] {validate_then_return_params(trimmed[0])};
@@ -118,7 +118,7 @@ Function::Function(const std::vector<std::string>& lines) {
   std::size_t line_offset {1};
   for (std::size_t i {1}; i < trimmed.size(); ++i, ++line_offset) {
     try {
-      auto [func, mapping] {parse_func_mapping(lines[i], params)};
+      auto [func, mapping] {parse_func_mapping(lines[i], params, variadic)};
       sub_funcs.push_back(func);
       param_mapping.push_back(mapping);
     } catch (const FunctionError& e) {
@@ -149,7 +149,7 @@ Function::Function(
 }
 
 void Function::operator()(const std::vector<std::string>& params) const {
-  if (param_count < params.size()) {
+  if (!variadic && param_count != params.size()) {
     throw FunctionError {errors::ErrInfo {
       .msg {std::format(
         "Error executing function `{}`: requires {} parameters, "
