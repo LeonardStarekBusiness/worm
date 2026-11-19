@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "worm/errors/interpreter_error.h"
+#include "worm/parse/keywords.h"
 #include "worm/parse/parse.h"
 #include "worm/parse/parse_error.h"
 #include "worm_tests/util/util.h"
@@ -83,6 +85,44 @@ void test_input_with_redundant_comma() {
 }
 } // namespace parse_identifiers_tests
 
+namespace vararg_len_tests {
+void test_normal_input() {
+  std::pair expected {keywords::vararg.size() + 2 + 1, 5};
+  auto actual {vararg_len("vararg[5], next_param")};
+  assert(actual == expected);
+}
+
+void test_float_idx_fails() {
+  try {
+    vararg_len("vararg[5.1], next_param");
+  } catch (const errors::InterpreterError& e) {
+    return;
+  }
+
+  assert(false && "Expected to throw, but didn't!");
+}
+
+void test_missing_right_bracket() {
+  try {
+    vararg_len("vararg[5, next_param");
+  } catch (const errors::InterpreterError& e) {
+    return;
+  }
+
+  assert(false && "Expected to throw, but didn't!");
+}
+
+void test_missing_left_bracket() {
+  try {
+    vararg_len("vararg5], next_param");
+  } catch (const errors::InterpreterError& e) {
+    return;
+  }
+
+  assert(false && "Expected to throw, but didn't!");
+}
+} // namespace vararg_len_tests
+
 void test_parse() {
   parse_identifiers_tests::test_empty_input();
   parse_identifiers_tests::test_non_ascii_input();
@@ -92,6 +132,11 @@ void test_parse() {
   parse_identifiers_tests::test_normal_input_with_end_paren();
   parse_identifiers_tests::test_input_with_missing_comma();
   parse_identifiers_tests::test_input_with_redundant_comma();
+
+  vararg_len_tests::test_normal_input();
+  vararg_len_tests::test_float_idx_fails();
+  vararg_len_tests::test_missing_left_bracket();
+  vararg_len_tests::test_missing_right_bracket();
 
   std::cout << "\x1b[32mAll tests for `worm::parse` passed!\x1b[0m\n";
 }

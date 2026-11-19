@@ -91,11 +91,11 @@ std::size_t number_len(std::string_view);
 std::size_t string_len(std::string_view);
 /*
  * Counts the amount of chars from the beginning of the string view that belong to an
- * indexed vararg parameter
+ * indexed vararg parameter and returns the length along with the vararg parameter index 
  *
  * Example: 
- * vararg[5], next_param -> `vararg_len()` would be 9
+ * vararg[5], next_param -> `vararg_len()` would be {9, 5}
  */
-std::size_t vararg_len(std::string_view);
+std::pair<std::size_t, std::size_t> vararg_len(std::string_view);
 } // namespace worm::parse
 #endif // WORM_PARSE_PARSE_H

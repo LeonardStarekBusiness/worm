@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <cctype>
+#include <charconv>
 #include <cstddef>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 #include "worm/errors/err_info.h"
@@ -151,9 +153,9 @@ std::vector<std::string> parse_params(std::string_view sv) {
   });
 }
 
-std::size_t vararg_len(std::string_view sv) {
+std::pair<std::size_t, std::size_t> vararg_len(std::string_view sv) {
   if (!sv.starts_with(parse::keywords::vararg)) {
-    return 0;
+    return {0, 0};
   }
 
   std::size_t len {parse::keywords::vararg.size()};
@@ -176,17 +178,27 @@ std::size_t vararg_len(std::string_view sv) {
         return ch == '.';
       })) {
     throw ParseError {errors::ErrInfo {
-      .msg {"Error parsing vararg-indexing parameter: Index must be an integer!"}
+      .msg {"Error parsing vararg-indexing parameter: Index can't be a float!"}
+    }};
+  }
+
+  std::size_t parsed_idx {};
+  auto [ptr, ec] =
+    std::from_chars(sv.begin() + len, sv.begin() + len + idx_len, parsed_idx);
+
+  if (ec != std::errc {} || ptr != sv.data() + len + idx_len) {
+    throw ParseError {errors::ErrInfo {
+      .msg {"Error parsing vararg-indexing parameter: Index can't be a float!"}
     }};
   }
 
   len += idx_len;
-  if (sv[len++] != ']')  {
+  if (sv[len++] != ']') {
     throw ParseError {
       errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing '['!"}}
     };
   }
 
-  return len++;
+  return {len, parsed_idx};
 }
 } // namespace worm::parse
