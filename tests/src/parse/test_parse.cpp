@@ -1,5 +1,4 @@
 #include <cassert>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -19,7 +18,7 @@ void test_empty_input() {
 
 void test_non_ascii_input() {
   try {
-    parse::parse_identifiers("hello, world, ü");
+    static_cast<void>(parse::parse_identifiers("hello, world, ü"));
   } catch (const ParseError& e) {
     return;
   }
@@ -29,7 +28,7 @@ void test_non_ascii_input() {
 
 void test_non_alphanumeric_space_input() {
   try {
-    parse::parse_identifiers("yeye, +, hlkj");
+    static_cast<void>(parse::parse_identifiers("yeye, +, hlkj"));
   } catch (const ParseError& e) {
     return;
   }
@@ -46,7 +45,7 @@ void test_normal_input() {
 
 void test_normal_input_with_start_paren() {
   try {
-    parse::parse_identifiers("(hello, world, test");
+    static_cast<void>(parse::parse_identifiers("(hello, world, test"));
   } catch (const ParseError& e) {
     return;
   }
@@ -56,7 +55,7 @@ void test_normal_input_with_start_paren() {
 
 void test_normal_input_with_end_paren() {
   try {
-    parse::parse_identifiers("hello, world, test)");
+    static_cast<void>(parse::parse_identifiers("hello, world, test)"));
   } catch (const ParseError& e) {
     return;
   }
@@ -66,7 +65,7 @@ void test_normal_input_with_end_paren() {
 
 void test_input_with_missing_comma() {
   try {
-    parse::parse_identifiers("(hello, world test)");
+    static_cast<void>(parse::parse_identifiers("(hello, world test)"));
   } catch (const std::invalid_argument& e) {
     return;
   }
@@ -76,7 +75,7 @@ void test_input_with_missing_comma() {
 
 void test_input_with_redundant_comma() {
   try {
-    parse::parse_identifiers("(hello, world,, test)");
+    static_cast<void>(parse::parse_identifiers("(hello, world,, test)"));
   } catch (const std::invalid_argument& e) {
     return;
   }
@@ -100,7 +99,7 @@ void test_longer_idx() {
 
 void test_float_idx_fails() {
   try {
-    vararg_len("vararg[5.1], next_param");
+    static_cast<void>(vararg_len("vararg[5.1], next_param"));
   } catch (const errors::InterpreterError& e) {
     return;
   }
@@ -110,7 +109,7 @@ void test_float_idx_fails() {
 
 void test_missing_right_bracket() {
   try {
-    vararg_len("vararg[5, next_param");
+    static_cast<void>(vararg_len("vararg[5, next_param"));
   } catch (const errors::InterpreterError& e) {
     return;
   }
@@ -120,7 +119,7 @@ void test_missing_right_bracket() {
 
 void test_missing_left_bracket() {
   try {
-    vararg_len("vararg5], next_param");
+    static_cast<void>(vararg_len("vararg5], next_param"));
   } catch (const errors::InterpreterError& e) {
     return;
   }

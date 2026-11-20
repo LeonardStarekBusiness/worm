@@ -1,4 +1,4 @@
-# Worm v0.2.0
+# Worm v0.3.0
 
 ## Compilation
 

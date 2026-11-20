@@ -4,7 +4,6 @@
 #include <concepts>
 #include <cstddef>
 #include <format>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -74,7 +73,6 @@ template <LengthGetter L>
     }
 
     if (token_len < sv.size() && !comma_separated) {
-      std::cout << "Detected token char: " << sv[token_len] << std::endl;
       throw std::invalid_argument(
         std::format(
           "Operating on input \"\x1b[31m{}\x1b[0m\":\n"

@@ -98,7 +98,6 @@ void Interpreter::run() {
           while (nextline_check_indent(file, line, indent_lvl, indent_width)) {
             auto cur_indent {util::string::indent_lvl(line)};
             if (!line.empty() && cur_indent <= base_indent_lvl) {
-              // std::cout << "\n\n\n" << line << "\n\n\n";
               reread_line = true;
               break;
             }

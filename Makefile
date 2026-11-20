@@ -31,4 +31,7 @@ re: fclean all
 test:
 	make -C tests test
 
-.PHONY: all clean fclean re test
+fcleantest:
+	make -C tests fclean test
+
+.PHONY: all clean fclean re test cleantest
