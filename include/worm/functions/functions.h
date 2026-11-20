@@ -11,12 +11,6 @@
 
 namespace worm::functions {
 /*
- * Used to handle NO-OPs (e.g. when an empty line occurs, this might help, depending on
- * parser implementation)
- */
-extern Function noop_func;
-
-/*
  * Used to keep track of all the Worm-functions declared at runtime or of
  * base-functions like print()
  * New function declarations should be added into this map

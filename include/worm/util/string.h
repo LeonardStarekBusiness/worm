@@ -43,7 +43,19 @@ std::vector<std::string> parse_list(
  * and that it must be surrounded by whitespaces to reduce ambiguity
  */
 bool contains_keyword(std::string_view needle, std::string_view haystack);
+/*
+ * Determines the level of indentation of given line
+ */
 std::size_t indent_lvl(const std::string&);
+/*
+ * Removes all escaping of string delimiters, leaving just the delimiters unescaped in 
+ * the string
+ *
+ * Example:
+ * Input: Hello, \" World
+ * Output: Hello, " World
+ */
+void unescape_str_delims(std::string&);
 } // namespace worm::util::string
 
 #endif // WORM_UTIL_STRING_H

@@ -3,12 +3,15 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <format>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include "worm/parse/parse.h"
+#include "worm/parse/types.h"
 
 namespace worm::util::string {
 bool isspace(char ch) {
@@ -74,25 +77,38 @@ std::vector<std::string> parse_list(
 ) {
   std::vector<std::string> params;
   while (!sv.empty()) {
-    std::size_t ilen {token_length(sv)};
-    std::string param {sv.begin(), sv.begin() + ilen};
+    std::string sv_cp {sv};
+    std::size_t token_len {token_length(sv)};
+    std::string param {sv.begin(), sv.begin() + token_len};
     params.push_back(param);
 
     bool comma_separated {false};
-    while (ilen < sv.size() && !is_token_char(sv[ilen])) {
-      if (comma_separated && sv[ilen] == ',') {
-        throw std::invalid_argument("Error parsing list: redundant comma!");
+    while (token_len < sv.size() && !is_token_char(sv[token_len])) {
+      if (comma_separated && sv[token_len] == ',') {
+        throw std::invalid_argument(
+          std::format(
+            "Operating on input \x1b[31m{}\x1b[0m\nError parsing list: redundant "
+            "comma!",
+            sv_cp
+          )
+        );
       }
 
-      comma_separated |= sv[ilen] == ',';
-      ++ilen;
+      comma_separated |= sv[token_len] == ',';
+      ++token_len;
     }
 
-    if (ilen < sv.size() && !comma_separated) {
-      throw std::invalid_argument("Error parsing list: missing comma!");
+    if (token_len < sv.size() && !comma_separated) {
+      throw std::invalid_argument(
+        std::format(
+          "Operating on input \x1b[31m{}\x1b[0m\n"
+          "Error parsing list: missing comma!",
+          sv_cp
+        )
+      );
     }
 
-    sv = {sv.begin() + ilen, sv.end()};
+    sv = {sv.begin() + token_len, sv.end()};
   }
 
   return params;
@@ -149,5 +165,16 @@ std::size_t indent_lvl(const std::string& s) {
   }
 
   return s.size();
+}
+
+void unescape_str_delims(std::string& s) {
+  std::size_t idx {1};
+  while (idx < s.size()) {
+    if (s[idx - 1] == '\\' && s[idx] == parse::types::str_delim) {
+      s.erase(idx - 1, 1);
+    } else {
+      ++idx;
+    }
+  }
 }
 } // namespace worm::util::string

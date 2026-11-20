@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "worm_tests/test_parse.h"
-#include "worm_tests/util/test_string.h"
+#include "worm_tests/util_tests/test_string.h"
 
 int main() {
   worm::parse::test_parse();

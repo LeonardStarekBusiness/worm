@@ -23,45 +23,47 @@ std::size_t identifier_len(std::string_view sv) {
   return len;
 }
 
-std::size_t param_len(std::string_view sv) {
+std::size_t number_len(std::string_view sv) {
+  std::size_t len {0};
+  while (len < sv.size() && parse::is_numeric_char(sv[len])) {
+    ++len;
+  }
+
+  return len;
+}
+
+std::size_t string_len(std::string_view sv) {
   if (sv.empty()) {
     return 0;
   }
 
-  bool in_str {false};
-  bool escaped {false};
-  bool (*allowed_char)(char);
-
-  if (sv[0] == types::str_delim) {
-    allowed_char = [](char) {
-      return true;
-    };
-
-    in_str = true;
-  } else if (parse::is_identifier_char(sv[0])) {
-    return identifier_len(sv);
-  } else if (parse::is_numeric_char(sv[0])) {
-    allowed_char = parse::is_numeric_char;
-  } else {
-    return 0;
-  }
-
+  bool in_str {sv[0] == parse::types::str_delim};
   std::size_t len {1};
-  while (
-    len < sv.size() && allowed_char(sv[len])
-    && (!in_str || !escaped || sv[len] != parse::types::str_delim)
-  ) {
-    if (in_str) {
-      escaped = !escaped && sv[len] == '\\';
+
+  while (in_str && len < sv.size()) {
+    if (sv[len - 1] != '\\' && sv[len] == parse::types::str_delim) {
+      in_str = false;
     }
 
     ++len;
   }
 
-  if (len < sv.size() && in_str && sv[len] == parse::types::str_delim) {
-    return ++len;
+  return len;
+}
+
+std::size_t param_len(std::string_view sv) {
+  if (sv.empty()) {
+    return 0;
+  }
+
+  if (parse::is_identifier_char(sv[0])) {
+    return identifier_len(sv);
+  } else if (parse::is_numeric_char(sv[0])) {
+    return number_len(sv);
+  } else if (sv[0] == parse::types::str_delim) {
+    return string_len(sv);
   } else {
-    return len;
+    return 0;
   }
 }
 
@@ -147,5 +149,44 @@ std::vector<std::string> parse_params(std::string_view sv) {
     return parse::is_identifier_char(ch) || parse::is_numeric_char(ch)
       || ch == parse::str_delim;
   });
+}
+
+std::size_t vararg_len(std::string_view sv) {
+  if (!sv.starts_with(parse::keywords::vararg)) {
+    return 0;
+  }
+
+  std::size_t len {parse::keywords::vararg.size()};
+  if (sv[len++] != '[') {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing '['!"}}
+    };
+  }
+
+  std::string_view idx_sv {sv.begin() + len, sv.end()};
+  std::size_t idx_len {number_len(idx_sv)};
+
+  if (!idx_len) {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing index!"}}
+    };
+  }
+
+  if (std::any_of(idx_sv.begin(), idx_sv.begin() + idx_len, [](auto ch) {
+        return ch == '.';
+      })) {
+    throw ParseError {errors::ErrInfo {
+      .msg {"Error parsing vararg-indexing parameter: Index must be an integer!"}
+    }};
+  }
+
+  len += idx_len;
+  if (sv[len++] != ']')  {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing '['!"}}
+    };
+  }
+
+  return len++;
 }
 } // namespace worm::parse
