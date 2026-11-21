@@ -1,5 +1,6 @@
 -g
 -Iinclude
+-Itests/include
 -x
 c++
 -std=c++23
