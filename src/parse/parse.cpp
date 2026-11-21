@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <cctype>
+#include <charconv>
 #include <cstddef>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 #include "worm/errors/err_info.h"
@@ -23,45 +25,48 @@ std::size_t identifier_len(std::string_view sv) {
   return len;
 }
 
-std::size_t param_len(std::string_view sv) {
+std::size_t number_len(std::string_view sv) {
+  std::size_t len {0};
+  while (len < sv.size() && parse::is_numeric_char(sv[len])) {
+    ++len;
+  }
+
+  return len;
+}
+
+std::size_t string_len(std::string_view sv) {
   if (sv.empty()) {
     return 0;
   }
 
-  bool in_str {false};
-  bool escaped {false};
-  bool (*allowed_char)(char);
-
-  if (sv[0] == types::str_delim) {
-    allowed_char = [](char) {
-      return true;
-    };
-
-    in_str = true;
-  } else if (parse::is_identifier_char(sv[0])) {
-    return identifier_len(sv);
-  } else if (parse::is_numeric_char(sv[0])) {
-    allowed_char = parse::is_numeric_char;
-  } else {
-    return 0;
-  }
-
+  bool in_str {sv[0] == parse::types::str_delim};
   std::size_t len {1};
-  while (
-    len < sv.size() && allowed_char(sv[len])
-    && (!in_str || !escaped || sv[len] != parse::types::str_delim)
-  ) {
-    if (in_str) {
-      escaped = !escaped && sv[len] == '\\';
+
+  while (in_str && len < sv.size()) {
+    if (sv[len - 1] != '\\' && sv[len] == parse::types::str_delim) {
+      in_str = false;
     }
 
     ++len;
   }
 
-  if (len < sv.size() && in_str && sv[len] == parse::types::str_delim) {
-    return ++len;
+  return len;
+}
+
+std::size_t param_len(std::string_view sv, bool variadic) {
+  if (sv.empty()) {
+    return 0;
+  }
+
+  if (parse::is_identifier_char(sv[0])) {
+    return variadic ? std::max(vararg_len(sv).first, identifier_len(sv))
+                    : identifier_len(sv);
+  } else if (parse::is_numeric_char(sv[0])) {
+    return number_len(sv);
+  } else if (sv[0] == parse::types::str_delim) {
+    return string_len(sv);
   } else {
-    return len;
+    return 0;
   }
 }
 
@@ -128,7 +133,7 @@ std::vector<std::string> parse_identifiers(std::string_view sv) {
   return util::string::parse_list(sv, identifier_len, parse::is_identifier_char);
 }
 
-std::vector<std::string> parse_params(std::string_view sv) {
+std::vector<std::string> parse_params(std::string_view sv, bool variadic) {
   if (sv.empty()) {
     return {};
   }
@@ -143,9 +148,64 @@ std::vector<std::string> parse_params(std::string_view sv) {
   }
 
   sv = {sv.begin() + 1, sv.end() - 1};
-  return util::string::parse_list(sv, param_len, [](auto ch) {
-    return parse::is_identifier_char(ch) || parse::is_numeric_char(ch)
-      || ch == parse::str_delim;
-  });
+  return util::string::parse_list(
+    sv,
+    [variadic](std::string_view sv) {
+      return param_len(sv, variadic);
+    },
+    [](auto ch) {
+      return parse::is_identifier_char(ch) || parse::is_numeric_char(ch)
+        || ch == types::str_delim;
+    }
+  );
+}
+
+std::pair<std::size_t, std::size_t> vararg_len(std::string_view sv) {
+  if (!sv.starts_with(parse::keywords::vararg)) {
+    return {0, 0};
+  }
+
+  std::size_t len {parse::keywords::vararg.size()};
+  if (sv[len++] != '[') {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing '['!"}}
+    };
+  }
+
+  std::string_view idx_sv {sv.begin() + len, sv.end()};
+  std::size_t idx_len {number_len(idx_sv)};
+
+  if (!idx_len) {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing index!"}}
+    };
+  }
+
+  if (std::any_of(idx_sv.begin(), idx_sv.begin() + idx_len, [](auto ch) {
+        return ch == '.';
+      })) {
+    throw ParseError {errors::ErrInfo {
+      .msg {"Error parsing vararg-indexing parameter: Index can't be a float!"}
+    }};
+  }
+
+  std::size_t parsed_idx {};
+  auto [ptr, ec] =
+    std::from_chars(sv.begin() + len, sv.begin() + len + idx_len, parsed_idx);
+
+  if (ec != std::errc {} || ptr != sv.data() + len + idx_len) {
+    throw ParseError {errors::ErrInfo {
+      .msg {"Error parsing vararg-indexing parameter: Index can't be a float!"}
+    }};
+  }
+
+  len += idx_len;
+  if (sv[len++] != ']') {
+    throw ParseError {
+      errors::ErrInfo {.msg {"Error parsing vararg-indexing parameter: Missing '['!"}}
+    };
+  }
+
+  return {len, parsed_idx};
 }
 } // namespace worm::parse

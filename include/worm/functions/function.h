@@ -29,8 +29,11 @@ public:
    * Used to return a hash that can be used as key to store the function
    * unambiguously in a data structure like a hashmap
    */
-  [[nodiscard]]
-  static std::string hash_code(const std::string& func_name, std::size_t param_count);
+  [[nodiscard]] static std::string hash_code(
+    const std::string& func_name,
+    std::size_t param_count,
+    bool variadic = false
+  );
 
   /*
    * @precondition: Before trying to call the constructor, the calling site's parser
@@ -41,15 +44,16 @@ public:
   Function(
     const std::string& name,
     std::size_t param_count,
-    void (*base_func)(const std::vector<std::string>&)
+    void (*base_func)(const std::vector<std::string>&),
+    bool variadic = false
   );
 
   void operator()(const std::vector<std::string>&) const;
 
-  std::string hash_code() const;
+  [[nodiscard]] std::string hash_code() const;
 
-  bool operator==(const Function& other) const;
-  bool operator!=(const Function& other) const;
+  [[nodiscard]] bool operator==(const Function& other) const;
+  [[nodiscard]] bool operator!=(const Function& other) const;
 
 private:
   std::string name;
@@ -82,6 +86,7 @@ private:
    * or build on top of those)
    */
   void (*const base_func)(const std::vector<std::string>&) = nullptr;
+  bool variadic = false;
 };
 } // namespace worm::functions
 

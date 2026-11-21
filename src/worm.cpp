@@ -6,6 +6,7 @@
 #include "worm/errors/interpreter_error.h"
 #include "worm/interpreter.h"
 
+namespace {
 std::vector<std::string> argv_to_vec(int argc, const char** argv) {
   std::vector<std::string> ret;
   for (int i {0}; i < argc; ++i) {
@@ -14,6 +15,7 @@ std::vector<std::string> argv_to_vec(int argc, const char** argv) {
 
   return ret;
 }
+} // namespace
 
 int main(int argc, const char** argv) {
   if (argc < 2) {
@@ -28,8 +30,7 @@ int main(int argc, const char** argv) {
     std::cout << "\x1b[31mIntepreter-error occurred\x1b[0m:\n" << e.what() << std::endl;
     return 1;
   } catch (const std::exception& e) {
-    std::cout << "\x1b[41mNon-interpreter-error occurred\x1b[0m:\n"
-              << e.what() << std::endl;
+    std::cout << "\x1b[41mInternal error occurred\x1b[0m:\n" << e.what() << std::endl;
     return 1;
   }
 

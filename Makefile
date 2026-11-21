@@ -1,7 +1,7 @@
 NAME = build/worm
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Wpedantic -Werror -g -std=c++23 -Iinclude -fsanitize=address -fno-omit-frame-pointer
+CXXFLAGS = -Wall -Wmissing-declarations -Wextra -Wpedantic -Werror -g -std=c++23 -Iinclude -fsanitize=address -fno-omit-frame-pointer
 
 SRC_FILES = $(shell find src -type f -name "*.cpp")
 OBJ_FILES = $(SRC_FILES:src/%.cpp=build/%.o)
@@ -31,4 +31,7 @@ re: fclean all
 test:
 	make -C tests test
 
-.PHONY: all clean fclean re test
+fcleantest:
+	make -C tests fclean test
+
+.PHONY: all clean fclean re test cleantest

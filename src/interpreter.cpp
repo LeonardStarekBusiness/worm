@@ -97,7 +97,7 @@ void Interpreter::run() {
 
           while (nextline_check_indent(file, line, indent_lvl, indent_width)) {
             auto cur_indent {util::string::indent_lvl(line)};
-            if (cur_indent <= base_indent_lvl) {
+            if (!line.empty() && cur_indent <= base_indent_lvl) {
               reread_line = true;
               break;
             }

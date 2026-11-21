@@ -1,0 +1,23 @@
+func print_second_param_once(vararg)
+  println(vararg[1])
+
+func print_first_param_twice( vararg )
+  println(vararg[0], vararg[0])
+
+func print_first_third_param(vararg)
+  println(vararg[0])
+  println(vararg[2])
+
+func print_twelfth_param(          vararg          )
+  println(vararg[11])
+
+print_second_param_once("NO", "YES", "HOLDUP", "NOOOOOO")
+println()
+print_first_param_twice("YES", "NO", "HELL NAH")
+println()
+print_first_third_param("YES", "NOOOO", "OH YEAH", "BRUH", "NOOUUUUHH!")
+println()
+print_twelfth_param(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
+println()
+print("Hello", ",", " ", "World", "!", " ", "x", 39, "x")
+println()

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace utility::types {
+namespace worm::parse::types {
 bool is_int(const std::string& s) {
   if (s.empty()) {
     return false;

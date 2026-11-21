@@ -3,12 +3,10 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
-#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <vector>
 
-#include "worm/parse/parse.h"
+#include "worm/parse/types.h"
 
 namespace worm::util::string {
 bool isspace(char ch) {
@@ -47,14 +45,6 @@ std::string_view trimmed_view(const std::string& s) {
   return std::string_view {start, end_incl.base()};
 }
 
-std::string_view strip_circumfix(const std::string& s, char target) {
-  if (s.empty() || s.front() != target || s.back() != target) {
-    return s;
-  }
-
-  return {s.begin() + 1, s.end() - 1};
-}
-
 std::string_view trimmed_view(std::string_view sv) {
   auto start {std::find_if(sv.begin(), sv.end(), [](auto ch) {
     return !isspace(ch);
@@ -67,35 +57,12 @@ std::string_view trimmed_view(std::string_view sv) {
   return std::string_view {start, end_incl.base()};
 }
 
-std::vector<std::string> parse_list(
-  std::string_view sv,
-  std::size_t (*token_length)(std::string_view),
-  bool (*is_token_char)(char)
-) {
-  std::vector<std::string> params;
-  while (!sv.empty()) {
-    std::size_t ilen {token_length(sv)};
-    std::string param {sv.begin(), sv.begin() + ilen};
-    params.push_back(param);
-
-    bool comma_separated {false};
-    while (ilen < sv.size() && !is_token_char(sv[ilen])) {
-      if (comma_separated && sv[ilen] == ',') {
-        throw std::invalid_argument("Error parsing list: redundant comma!");
-      }
-
-      comma_separated |= sv[ilen] == ',';
-      ++ilen;
-    }
-
-    if (ilen < sv.size() && !comma_separated) {
-      throw std::invalid_argument("Error parsing list: missing comma!");
-    }
-
-    sv = {sv.begin() + ilen, sv.end()};
+std::string_view strip_circumfix(const std::string& s, char target) {
+  if (s.empty() || s.front() != target || s.back() != target) {
+    return s;
   }
 
-  return params;
+  return {s.begin() + 1, s.end() - 1};
 }
 
 bool contains_keyword(std::string_view needle, std::string_view haystack) {
@@ -114,7 +81,7 @@ bool contains_keyword(std::string_view needle, std::string_view haystack) {
   std::size_t idx {1};
 
   while (idx + needle.size() < haystack.size()) {
-    if (haystack[idx] == parse::str_delim) {
+    if (haystack[idx] == parse::types::str_delim) {
       in_str = !in_str;
     }
 
@@ -149,5 +116,16 @@ std::size_t indent_lvl(const std::string& s) {
   }
 
   return s.size();
+}
+
+void unescape_str_delims(std::string& s) {
+  std::size_t idx {1};
+  while (idx < s.size()) {
+    if (s[idx - 1] == '\\' && s[idx] == parse::types::str_delim) {
+      s.erase(idx - 1, 1);
+    } else {
+      ++idx;
+    }
+  }
 }
 } // namespace worm::util::string

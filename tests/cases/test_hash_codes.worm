@@ -1,0 +1,2 @@
+sleep(10000)
+print("Hello, world", "It's a cool day")

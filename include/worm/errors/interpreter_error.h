@@ -10,8 +10,8 @@ namespace worm::errors {
 struct InterpreterError : public std::exception {
   InterpreterError(ErrInfo);
 
-  const char* what() const noexcept override;
-  InterpreterError shortened() const;
+  [[nodiscard]] const char* what() const noexcept override;
+  [[nodiscard]] InterpreterError shortened() const;
 
   ErrInfo err_info;
 
